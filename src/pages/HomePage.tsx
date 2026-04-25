@@ -4,6 +4,7 @@ import { SelectableCard } from '@/components/SelectableCard';
 import { ScoreDisplay } from '@/components/ScoreDisplay';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Toaster, toast } from 'sonner';
+import { LogicPreview } from '@/components/LogicPreview';
 import { ShieldCheck, Info } from 'lucide-react';
 export function HomePage() {
   const [scores, setScores] = useState<Record<string, number | null>>({
@@ -34,6 +35,7 @@ export function HomePage() {
   };
   return (
     <div className="min-h-screen bg-slate-50/50 pb-40 lg:pb-12">
+      <LogicPreview />
       <ThemeToggle />
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm transition-shadow duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
