@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { calculateRiskLevel } from '@/lib/braden-data';
 import { cn } from '@/lib/utils';
-import { AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { AlertCircle, Info } from 'lucide-react';
 interface ScoreDisplayProps {
   scores: Record<string, number | null>;
   onReset: () => void;
@@ -12,7 +12,6 @@ export function ScoreDisplay({ scores, onReset }: ScoreDisplayProps) {
   const isComplete = answeredCount === 6;
   const totalScore = Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0);
   const risk = calculateRiskLevel(totalScore);
-  const containerClasses = "w-full lg:sticky lg:top-8 transition-all duration-300";
   const mobileWrapperClasses = "fixed bottom-0 left-0 right-0 z-50 lg:relative lg:bottom-auto lg:z-0";
   return (
     <div className={mobileWrapperClasses}>
@@ -25,7 +24,7 @@ export function ScoreDisplay({ scores, onReset }: ScoreDisplayProps) {
             <div className="flex-1 lg:w-full">
               <div className="flex items-center gap-2 mb-1 lg:mb-2">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-                  Assessment Progress
+                  ความคืบหน้าการประเมิน
                 </span>
                 <span className="text-xs font-bold text-teal-600">
                   {answeredCount}/6
@@ -46,25 +45,24 @@ export function ScoreDisplay({ scores, onReset }: ScoreDisplayProps) {
               {isComplete ? (
                 <div className={cn("hidden lg:flex items-center gap-2 p-3 rounded-lg border text-sm", risk.bg, risk.border, risk.color)}>
                   <Info className="w-4 h-4 flex-shrink-0" />
-                  <span>Recommendation based on {risk.label} status.</span>
+                  <span>คำแนะนำสำหรับสถานะ {risk.label}</span>
                 </div>
               ) : (
                 <div className="hidden lg:flex items-center gap-2 p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 text-sm">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>Please complete all 6 categories.</span>
+                  <span>กรุณาตอบครบทั้ง 6 หัวข้อ</span>
                 </div>
               )}
               <button
                 onClick={onReset}
                 className="btn border border-slate-200 hover:bg-slate-50 text-slate-600 lg:w-full rounded-lg transition-colors text-sm py-2"
               >
-                Reset Assessment
+                ล้างการประเมิน
               </button>
             </div>
           </div>
         </CardContent>
       </Card>
-      {/* Spacer for mobile to prevent content clipping */}
       <div className="h-4 lg:hidden bg-white" />
     </div>
   );

@@ -1,11 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { BRADEN_CATEGORIES } from '@/lib/braden-data';
 import { SelectableCard } from '@/components/SelectableCard';
 import { ScoreDisplay } from '@/components/ScoreDisplay';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Toaster, toast } from 'sonner';
 import { ShieldCheck, Info } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 export function HomePage() {
   const [scores, setScores] = useState<Record<string, number | null>>({
     sensory: null,
@@ -30,7 +29,7 @@ export function HomePage() {
       nutrition: null,
       friction: null,
     });
-    toast.info("Assessment reset");
+    toast.info("ล้างข้อมูลการประเมินเรียบร้อยแล้ว");
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   return (
@@ -45,12 +44,14 @@ export function HomePage() {
               </div>
               <div>
                 <h1 className="text-xl font-display font-bold text-slate-900">Braden Scale Pro</h1>
-                <p className="hidden sm:block text-xs text-muted-foreground font-medium uppercase tracking-wider">Pressure Ulcer Risk Assessment</p>
+                <p className="hidden sm:block text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                  การประเมินความเสี่ยงแผลกดทับ
+                </p>
               </div>
             </div>
             <div className="hidden md:flex items-center gap-2 text-sm text-slate-500 font-medium">
               <Info className="w-4 h-4" />
-              <span>Evidence-based clinical tool</span>
+              <span>เครื่องมือทางคลินิกอ้างอิงหลักฐานเชิงประจักษ์</span>
             </div>
           </div>
         </div>
@@ -66,9 +67,9 @@ export function HomePage() {
                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-sm">
                       {index + 1}
                     </span>
-                    <h2 className="text-2xl font-display font-bold text-slate-900">{category.title}</h2>
+                    <h2 className="text-2xl font-display font-bold text-slate-900 leading-tight">{category.title}</h2>
                   </div>
-                  <p className="text-slate-500 ml-11">{category.description}</p>
+                  <p className="text-slate-500 ml-11 leading-relaxed">{category.description}</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ml-0 lg:ml-11">
                   {category.options.map((option) => (
@@ -92,8 +93,8 @@ export function HomePage() {
         </div>
       </main>
       <footer className="hidden lg:block border-t border-slate-200 mt-12 py-8 bg-white/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-400 text-sm">
-          <p>© {new Date().getFullYear()} Braden Scale Pro. Clinical use only. Developed for professional healthcare environments.</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-400 text-sm leading-relaxed">
+          <p>© {new Date().getFullYear()} Braden Scale Pro. สำหรับการใช้งานทางคลินิกเท่านั้น พัฒนาขึ้นเพื่อบุคลากรทางการแพทย์</p>
         </div>
       </footer>
       <Toaster position="top-center" richColors />
