@@ -16,16 +16,18 @@ export function SelectableCard({ selected, onClick, label, description, value }:
       className={cn(
         "relative flex flex-col p-4 cursor-pointer transition-all duration-200 border-2 group min-h-[140px]",
         selected
-          ? "border-teal-600 bg-teal-50/50 ring-1 ring-teal-600/20 shadow-md"
-          : "border-transparent bg-white hover:border-teal-200 hover:bg-slate-50/80 shadow-sm"
+          ? "border-teal-600 bg-teal-50/50 dark:bg-teal-950/20 ring-1 ring-teal-600/20 shadow-md"
+          : "border-transparent bg-card hover:border-teal-200 dark:hover:border-teal-800 hover:bg-accent/50 shadow-sm"
       )}
     >
       <div className="flex justify-between items-start mb-2">
         <span className={cn(
-          "text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded",
-          selected ? "bg-teal-600 text-white" : "bg-slate-100 text-slate-500 group-hover:bg-teal-100 group-hover:text-teal-700"
+          "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded",
+          selected 
+            ? "bg-teal-600 text-white" 
+            : "bg-muted text-muted-foreground group-hover:bg-teal-100 group-hover:text-teal-700 dark:group-hover:bg-teal-900 dark:group-hover:text-teal-300"
         )}>
-          คะแนน: {value}
+          Score: {value}
         </span>
         {selected && (
           <CheckCircle2 className="w-5 h-5 text-teal-600 animate-in fade-in zoom-in duration-300" />
@@ -33,13 +35,13 @@ export function SelectableCard({ selected, onClick, label, description, value }:
       </div>
       <h4 className={cn(
         "font-semibold text-base mb-1 leading-tight",
-        selected ? "text-teal-900" : "text-foreground"
+        selected ? "text-teal-900 dark:text-teal-100" : "text-foreground"
       )}>
         {label}
       </h4>
       <p className={cn(
         "text-sm leading-relaxed",
-        selected ? "text-teal-800/80" : "text-muted-foreground"
+        selected ? "text-teal-800/80 dark:text-teal-400/80" : "text-muted-foreground"
       )}>
         {description}
       </p>

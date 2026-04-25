@@ -12,104 +12,104 @@ export interface BradenCategory {
 export const BRADEN_CATEGORIES: BradenCategory[] = [
   {
     id: "sensory",
-    title: "การรับความรู้สึก",
-    description: "ความสามารถในการตอบสนองต่อความไม่สุขสบายจากแรงกดทับ",
+    title: "Sensory Perception",
+    description: "Ability to respond meaningfully to pressure-related discomfort",
     options: [
-      { value: 1, label: "จำกัดมากที่สุด", description: "ไม่ตอบสนองต่อความเจ็บปวดเนื่องจากระดับความรู้สึกตัวลดลงหรือได้รับยาระงับประสาท" },
-      { value: 2, label: "จำกัดมาก", description: "ตอบสนองเฉพาะต่อสิ่งกระตุ้นที่เจ็บปวดเท่านั้น ไม่สามารถสื่อสารความไม่สุขสบายได้นอกจากส่งเสียงคราง" },
-      { value: 3, label: "จำกัดเล็กน้อย", description: "ตอบสนองต่อคำสั่งเสียงได้บ้าง แต่ไม่สามารถสื่อสารความต้องการหรือความเจ็บปวดได้ตลอดเวลา" },
-      { value: 4, label: "ไม่มีความบกพร่อง", description: "ตอบสนองต่อคำสั่งเสียงได้ดี ไม่มีภาวะบกพร่องด้านการรับความรู้สึกที่จำกัดความสามารถในการรับรู้ความเจ็บปวด" },
+      { value: 1, label: "Completely Limited", description: "Unresponsive (does not moan, flinch, or grasp) to painful stimuli." },
+      { value: 2, label: "Very Limited", description: "Responds only to painful stimuli. Cannot communicate discomfort except by moaning." },
+      { value: 3, label: "Slightly Limited", description: "Responds to verbal commands but cannot always communicate discomfort." },
+      { value: 4, label: "No Impairment", description: "Responds to verbal commands. Has no sensory deficit which would limit ability to feel pain." },
     ],
   },
   {
     id: "moisture",
-    title: "ความชื้น",
-    description: "ระดับที่ผิวหนังต้องสัมผัสกับความเปียกชื้น",
+    title: "Moisture",
+    description: "Degree to which skin is exposed to moisture",
     options: [
-      { value: 1, label: "ชื้นตลอดเวลา", description: "ผิวหนังเปียกชื้นเกือบตลอดเวลาจากเหงื่อ ปัสสาวะ หรืออื่นๆ" },
-      { value: 2, label: "ชื้นมาก", description: "ผิวหนังเปียกชื้นบ่อยครั้งแต่ไม่ตลอดเวลา ต้องเปลี่ยนผ้าปูที่นอนอย่างน้อยหนึ่งครั้งต่อเวร" },
-      { value: 3, label: "ชื้นเป็นครั้งคราว", description: "ผิวหนังเปียกชื้นเป็นครั้งคราว ต้องเปลี่ยนผ้าปูที่นอนเพิ่มพิเศษประมาณวันละครั้ง" },
-      { value: 4, label: "ชื้นน้อยมาก", description: "ผิวหนังแห้งเป็นปกติ เปลี่ยนผ้าปูที่นอนตามระยะเวลาปกติเท่านั้น" },
+      { value: 1, label: "Constantly Moist", description: "Skin is kept moist almost constantly by perspiration, urine, etc." },
+      { value: 2, label: "Very Moist", description: "Skin is often, but not always moist. Linen must be changed at least once a shift." },
+      { value: 3, label: "Occasionally Moist", description: "Skin is occasionally moist, requiring an extra linen change approximately once a day." },
+      { value: 4, label: "Rarely Moist", description: "Skin is usually dry, linen only requires changing at routine intervals." },
     ],
   },
   {
     id: "activity",
-    title: "การทำกิจกรรม",
-    description: "ระดับของการทำกิจกรรมทางกาย",
+    title: "Activity",
+    description: "Degree of physical activity",
     options: [
-      { value: 1, label: "นอนบนเตียงตลอดเวลา", description: "จำกัดอยู่เฉพาะบนเตียงเท่านั้น" },
-      { value: 2, label: "นั่งบนเก้าอี้ตลอดเวลา", description: "ความสามารถในการเดินจำกัดมากหรือไม่สามารถเดินได้เลย ไม่สามารถรับน้ำหนักตัวเองได้" },
-      { value: 3, label: "เดินได้บ้างเล็กน้อย", description: "เดินได้บ้างในระหว่างวัน แต่เดินได้ในระยะทางสั้นๆ ทั้งที่มีหรือไม่มีผู้ช่วย" },
-      { value: 4, label: "เดินได้บ่อย", description: "เดินออกนอกห้องได้อย่างน้อยวันละ 2 ครั้ง และเดินภายในห้องได้อย่างน้อยทุก 2 ชั่วโมง" },
+      { value: 1, label: "Bedfast", description: "Confined to bed." },
+      { value: 2, label: "Chairfast", description: "Ability to walk severely limited or nonexistent. Cannot bear own weight." },
+      { value: 3, label: "Walks Occasionally", description: "Walks occasionally during day, but for very short distances, with or without assistance." },
+      { value: 4, label: "Walks Frequently", description: "Walks outside room at least twice a day and inside room at least once every two hours." },
     ],
   },
   {
     id: "mobility",
-    title: "การเคลื่อนไหว",
-    description: "ความสามารถในการเปลี่ยนและควบคุมท่าทางของร่างกาย",
+    title: "Mobility",
+    description: "Ability to change and control body position",
     options: [
-      { value: 1, label: "ไม่เคลื่อนไหวเลย", description: "ไม่สามารถขยับร่างกายหรือแขนขาได้เลยแม้เพียงเล็กน้อยโดยไม่มีผู้ช่วย" },
-      { value: 2, label: "เคลื่อนไหวได้จำกัดมาก", description: "ขยับร่างกายหรือแขนขาได้เล็กน้อยเป็นครั้งคราว แต่ไม่สามารถขยับได้บ่อย" },
-      { value: 3, label: "เคลื่อนไหวได้จำกัดเล็กน้อย", description: "ขยับร่างกายหรือแขนขาได้บ่อยและสม่ำเสมอด้วยตนเอง" },
-      { value: 4, label: "เคลื่อนไหวได้ปกติ", description: "เปลี่ยนท่าทางได้บ่อยและทำได้เองอย่างอิสระ" },
+      { value: 1, label: "Completely Immobile", description: "Does not make even slight changes in body or extremity position without assistance." },
+      { value: 2, label: "Very Limited", description: "Makes occasional slight changes in body or extremity position but unable to make frequent or significant changes independently." },
+      { value: 3, label: "Slightly Limited", description: "Makes frequent though slight changes in body or extremity position independently." },
+      { value: 4, label: "No Limitation", description: "Makes major and frequent changes in position without assistance." },
     ],
   },
   {
     id: "nutrition",
-    title: "ภาวะโภชนาการ",
-    description: "รูปแบบการรับประทานอาหารตามปกติ",
+    title: "Nutrition",
+    description: "Usual food intake pattern",
     options: [
-      { value: 1, label: "แย่มาก", description: "รับประทานอาหารไม่เคยหมดมื้อ รับประทานได้น้อยกว่า 1 ใน 3 ของอาหารที่จัดให้" },
-      { value: 2, label: "ไม่เพียงพอ", description: "ไม่ค่อยรับประทานอาหารหมดมื้อ โดยปกติจะรับประทานได้เพียงครึ่งเดียวของอาหารที่จัดให้" },
-      { value: 3, label: "เพียงพอ", description: "รับประทานอาหารได้มากกว่าครึ่งหนึ่งในเกือบทุกมื้อ และได้รับโปรตีนประมาณ 4 ส่วนต่อวัน" },
-      { value: 4, label: "ดีเยี่ยม", description: "รับประทานอาหารหมดเกือบทุกมื้อ ไม่เคยปฏิเสธอาหาร และรับประทานอาหารว่างระหว่างมื้อบ้าง" },
+      { value: 1, label: "Very Poor", description: "Never eats a complete meal. Rarely eats more than 1/3 of any food offered." },
+      { value: 2, label: "Probably Inadequate", description: "Rarely eats a complete meal and generally eats only about 1/2 of any food offered." },
+      { value: 3, label: "Adequate", description: "Eats over half of most meals. Eats a total of 4 servings of protein per day." },
+      { value: 4, label: "Excellent", description: "Eats most of every meal. Never refuses a meal. Occasionally eats between meals." },
     ],
   },
   {
     id: "friction",
-    title: "แรงเสียดทานและแรงเฉือน",
-    description: "การปฏิสัมพันธ์ของผิวหนังกับพื้นผิวสัมผัส",
+    title: "Friction & Shear",
+    description: "Interactions with surfaces during movement",
     options: [
-      { value: 1, label: "มีปัญหา", description: "ต้องการความช่วยเหลือปานกลางถึงมากในการเคลื่อนย้าย ไม่สามารถยกตัวให้พ้นพื้นผิวโดยไม่ไถลได้" },
-      { value: 2, label: "อาจมีปัญหา", description: "เคลื่อนไหวได้เองบ้างหรือต้องการความช่วยเหลือน้อย ผิวหนังมักจะไถลไปกับพื้นผิวขณะเคลื่อนย้าย" },
-      { value: 3, label: "ไม่มีปัญหา", description: "เคลื่อนไหวบนเตียงและเก้าอี้ได้เอง มีกำลังกล้ามเนื้อเพียงพอที่จะยกตัวให้พ้นพื้นผิวขณะเคลื่อนย้าย" },
+      { value: 1, label: "Problem", description: "Requires moderate to maximum assistance in moving. Sliding against sheets is likely." },
+      { value: 2, label: "Potential Problem", description: "Moves feebly or requires minimum assistance. Skin probably slides against sheets." },
+      { value: 3, label: "No Apparent Problem", description: "Moves in bed and in chair independently and has sufficient muscle strength to lift up completely." },
     ],
   },
 ];
 export const calculateRiskLevel = (score: number) => {
-  if (score <= 9) return { 
-    label: "เสี่ยงสูงมาก", 
-    color: "text-red-600", 
-    bg: "bg-red-50", 
-    border: "border-red-200",
-    action: "ต้องมีการเฝ้าระวังอย่างใกล้ชิดและใช้มาตรการป้องกันแผลกดทับเต็มรูปแบบทันที"
+  if (score <= 9) return {
+    label: "Severe Risk",
+    color: "text-red-600 dark:text-red-400",
+    bg: "bg-red-50 dark:bg-red-950/20",
+    border: "border-red-200 dark:border-red-900/50",
+    action: "Immediate intensive intervention and pressure-relief strategy required."
   };
-  if (score <= 12) return { 
-    label: "เสี่ยงสูง", 
-    color: "text-orange-600", 
-    bg: "bg-orange-50", 
-    border: "border-orange-200",
-    action: "ควรจัดตารางการเปลี่ยนท่านอนอย่างเข้มงวดและใช้อุปกรณ์ลดแรงกดทับ"
+  if (score <= 12) return {
+    label: "High Risk",
+    color: "text-orange-600 dark:text-orange-400",
+    bg: "bg-orange-50 dark:bg-orange-950/20",
+    border: "border-orange-200 dark:border-orange-900/50",
+    action: "Strict turning schedule and pressure-reducing surface mandatory."
   };
-  if (score <= 14) return { 
-    label: "เสี่ยงปานกลาง", 
-    color: "text-amber-600", 
-    bg: "bg-amber-50", 
-    border: "border-amber-200",
-    action: "เฝ้าระวังและพิจารณาใช้อุปกรณ์เสริมเพื่อลดแรงกดทับในจุดที่เสี่ยง"
+  if (score <= 14) return {
+    label: "Moderate Risk",
+    color: "text-amber-600 dark:text-amber-400",
+    bg: "bg-amber-50 dark:bg-amber-950/20",
+    border: "border-amber-200 dark:border-amber-900/50",
+    action: "Increase monitoring and consider adjunct pressure-relief devices."
   };
-  if (score <= 18) return { 
-    label: "เสี่ยงต่ำ", 
-    color: "text-yellow-600", 
-    bg: "bg-yellow-50", 
-    border: "border-yellow-200",
-    action: "หมั่นสังเกตสภาพผิวหนังและประเมินซ้ำตามระยะเวลาที่กำหนด"
+  if (score <= 18) return {
+    label: "Mild Risk",
+    color: "text-yellow-600 dark:text-yellow-400",
+    bg: "bg-yellow-50 dark:bg-yellow-950/20",
+    border: "border-yellow-200 dark:border-yellow-900/50",
+    action: "Maintain skin hygiene and reassess on defined regular intervals."
   };
-  return { 
-    label: "ไม่มีความเสี่ยง", 
-    color: "text-emerald-600", 
-    bg: "bg-emerald-50", 
-    border: "border-emerald-200",
-    action: "ประเมินซ้ำเมื่อมีการเปลี่ยนแปลงของสภาวะสุขภาพผู้ป่วย"
+  return {
+    label: "No Risk",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bg: "bg-emerald-50 dark:bg-emerald-950/20",
+    border: "border-emerald-200 dark:border-emerald-900/50",
+    action: "Reassess if patient's clinical status changes significantly."
   };
 };

@@ -7,9 +7,11 @@ import { Toaster, toast } from 'sonner';
 import { LogicPreview } from '@/components/LogicPreview';
 import { PatientInfoForm } from '@/components/PatientInfoForm';
 import { usePatientInfo } from '@/hooks/use-patient-info';
-import { ShieldCheck, Info } from 'lucide-react';
+import { ShieldCheck, Info, ChevronUp, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 export function HomePage() {
   const { patientInfo, updateField, resetPatientInfo, isPatientValid } = usePatientInfo();
+  const [showLogic, setShowLogic] = useState(false);
   const [scores, setScores] = useState<Record<string, number | null>>({
     sensory: null,
     moisture: null,
@@ -21,7 +23,6 @@ export function HomePage() {
   const answeredCount = Object.values(scores).filter((v) => v !== null).length;
   const isComplete = answeredCount === 6;
   useEffect(() => {
-    // FIX: isPatientValid is now a boolean, not a function
     if (isComplete && !isPatientValid) {
       toast.warning("กรุณากรอกชื่อและ HN ผู้ป่วยเพื่อให้การประเมินสมบูรณ์", {
         id: "validation-warning",
@@ -52,6 +53,9 @@ export function HomePage() {
       toast.error("กรุณาประเมินให้ครบทั้ง 6 หัวข้อก่อนคัดลอกสรุป");
       return;
     }
+    if (!isPatientValid) {
+      toast.warning("ข้อมูลผู้ป่วยไม่ครบถ้วน (ชื่อ/HN) สรุปผลอาจไม่สมบูรณ์สำหรับการบันทึกทางการแพทย์");
+    }
     const totalScore = Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0);
     const risk = calculateRiskLevel(totalScore);
     let summaryText = `[สรุปผลการประเมิน Braden Scale]\n`;
@@ -73,12 +77,41 @@ export function HomePage() {
     }).catch(() => {
       toast.error("ไม่สามารถคัดลอกข้อมูลได้");
     });
-  }, [scores, isComplete, patientInfo]);
+  }, [scores, isComplete, patientInfo, isPatientValid]);
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-48 lg:pb-12">
-      <LogicPreview />
+    <div className="min-h-screen bg-background text-foreground pb-48 lg:pb-12 transition-colors duration-300">
+      <div className="bg-slate-900 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <button 
+            onClick={() => setShowLogic(!showLogic)}
+            className="flex items-center justify-between w-full py-3 text-slate-400 hover:text-white transition-colors text-xs font-mono"
+          >
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
+              CLINICAL ALGORITHM PREVIEW
+            </div>
+            <div className="flex items-center gap-1">
+              {showLogic ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              <span>{showLogic ? 'HIDE' : 'SHOW'} LOGIC</span>
+            </div>
+          </button>
+        </div>
+        <AnimatePresence>
+          {showLogic && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <LogicPreview />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
       <ThemeToggle />
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm transition-shadow duration-300">
+      <header className="bg-background/80 backdrop-blur-md border-b sticky top-0 z-40 shadow-sm transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -86,15 +119,15 @@ export function HomePage() {
                 <ShieldCheck className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-display font-bold text-slate-900 tracking-tight">Braden Scale Pro</h1>
+                <h1 className="text-xl font-display font-bold text-foreground tracking-tight">Braden Scale Pro</h1>
                 <p className="hidden sm:block text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em]">
-                  การประเมินความเสี่ยงแผลกดทับ
+                  Medical Risk Assessment Tool
                 </p>
               </div>
             </div>
-            <div className="hidden md:flex items-center gap-2 text-sm text-slate-500 font-medium bg-slate-100 px-3 py-1.5 rounded-full">
+            <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground font-medium bg-muted px-3 py-1.5 rounded-full">
               <Info className="w-4 h-4 text-teal-600" />
-              <span>เครื่องมือทางคลินิกมาตรฐาน</span>
+              <span>Standard Clinical Instrument</span>
             </div>
           </div>
         </div>
@@ -112,18 +145,18 @@ export function HomePage() {
               <section
                 key={category.id}
                 className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
-                style={{ animationDelay: `${index * 150}ms` }}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="mb-8">
                   <div className="flex items-center gap-4 mb-3">
-                    <span className="flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-900 text-white font-bold text-base shadow-lg shadow-slate-900/20">
+                    <span className="flex items-center justify-center w-10 h-10 rounded-2xl bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/20">
                       {index + 1}
                     </span>
-                    <h2 className="text-2xl md:text-3xl font-display font-bold text-slate-900 leading-tight">
+                    <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground leading-tight">
                       {category.title}
                     </h2>
                   </div>
-                  <p className="text-slate-500 ml-14 text-lg leading-relaxed max-w-2xl">
+                  <p className="text-muted-foreground ml-14 text-lg leading-relaxed max-w-2xl">
                     {category.description}
                   </p>
                 </div>
@@ -142,7 +175,7 @@ export function HomePage() {
               </section>
             ))}
           </div>
-          <aside className="lg:col-span-4 lg:sticky lg:top-28 transition-all duration-300">
+          <aside className="lg:col-span-4 lg:sticky lg:top-28">
             <ScoreDisplay
               scores={scores}
               patientInfo={patientInfo}
@@ -153,11 +186,11 @@ export function HomePage() {
           </aside>
         </div>
       </main>
-      <footer className="hidden lg:block border-t border-slate-200 mt-20 py-12 bg-white/50">
+      <footer className="hidden lg:block border-t mt-20 py-12 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-slate-400 text-sm leading-relaxed max-w-lg mx-auto">
-            © {new Date().getFullYear()} Braden Scale Pro. ออกแบบมาเพื่อบุคลากรทางการแพทย์
-            ข้อมูลนี้ใช้ประกอบการตัดสินใจทางคลินิกเท่านั้น
+          <p className="text-muted-foreground text-sm leading-relaxed max-w-lg mx-auto">
+            © {new Date().getFullYear()} Braden Scale Pro. Designed for healthcare professionals.
+            This tool is intended for clinical decision support only.
           </p>
         </div>
       </footer>
