@@ -2,18 +2,21 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { calculateRiskLevel } from '@/lib/braden-data';
 import { cn } from '@/lib/utils';
-import { AlertCircle, Info, RotateCcw, ShieldAlert } from 'lucide-react';
+import { AlertCircle, RotateCcw, ShieldAlert, User, AlertTriangle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { PatientInfo } from '@/hooks/use-patient-info';
 interface ScoreDisplayProps {
   scores: Record<string, number | null>;
+  patientInfo: PatientInfo;
   onReset: () => void;
 }
-export function ScoreDisplay({ scores, onReset }: ScoreDisplayProps) {
+export function ScoreDisplay({ scores, patientInfo, onReset }: ScoreDisplayProps) {
   const answeredCount = Object.values(scores).filter((v) => v !== null).length;
   const isComplete = answeredCount === 6;
   const totalScore = Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0);
   const risk = calculateRiskLevel(totalScore);
   const completionPercentage = (answeredCount / 6) * 100;
+  const isPatientValid = patientInfo.name.trim() !== '' && patientInfo.hn.trim() !== '';
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 lg:relative lg:bottom-auto lg:z-0 lg:block p-0 sm:p-4 lg:p-0">
       <Card className={cn(
@@ -23,6 +26,24 @@ export function ScoreDisplay({ scores, onReset }: ScoreDisplayProps) {
         <CardContent className="p-5 md:p-8 bg-white/90 backdrop-blur-xl">
           <div className="flex lg:flex-col items-center lg:items-stretch justify-between gap-6">
             <div className="flex-1 lg:w-full space-y-4">
+              {isComplete && (
+                <div className="hidden lg:flex flex-col gap-1 p-3 bg-slate-50 rounded-xl border border-slate-100 animate-in fade-in zoom-in duration-300">
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <User className="w-3 h-3 text-teal-600" /> ข้อมูลผู้ป่วย
+                  </div>
+                  <div className="text-sm font-medium text-slate-700 truncate">
+                    ผู้ป่วย: {patientInfo.name || '-'}
+                  </div>
+                  <div className="text-xs text-slate-500 truncate">
+                    HN: {patientInfo.hn || '-'} | เตียง: {patientInfo.bed || '-'}
+                  </div>
+                  {isComplete && !isPatientValid && (
+                    <div className="mt-2 flex items-center gap-1 text-[10px] text-red-500 font-bold">
+                      <AlertTriangle className="w-3 h-3" /> กรุณาระบุชื่อและ HN
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -82,7 +103,6 @@ export function ScoreDisplay({ scores, onReset }: ScoreDisplayProps) {
           </div>
         </CardContent>
       </Card>
-      {/* Mobile safety spacer */}
       <div className="h-6 lg:hidden bg-slate-50/50" />
     </div>
   );

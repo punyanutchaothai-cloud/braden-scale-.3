@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BRADEN_CATEGORIES } from '@/lib/braden-data';
 import { SelectableCard } from '@/components/SelectableCard';
 import { ScoreDisplay } from '@/components/ScoreDisplay';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Toaster, toast } from 'sonner';
 import { LogicPreview } from '@/components/LogicPreview';
+import { PatientInfoForm } from '@/components/PatientInfoForm';
+import { usePatientInfo } from '@/hooks/use-patient-info';
 import { ShieldCheck, Info } from 'lucide-react';
 export function HomePage() {
+  const { patientInfo, updateField, resetPatientInfo, isValid: isPatientValid } = usePatientInfo();
   const [scores, setScores] = useState<Record<string, number | null>>({
     sensory: null,
     moisture: null,
@@ -15,6 +18,15 @@ export function HomePage() {
     nutrition: null,
     friction: null,
   });
+  const answeredCount = Object.values(scores).filter((v) => v !== null).length;
+  const isComplete = answeredCount === 6;
+  useEffect(() => {
+    if (isComplete && !isPatientValid()) {
+      toast.warning("กรุณากรอกชื่อและ HN ผู้ป่วยเพื่อให้การประเมินสมบูรณ์", {
+        id: "validation-warning",
+      });
+    }
+  }, [isComplete, isPatientValid]);
   const handleSelect = (categoryId: string, value: number) => {
     setScores(prev => ({
       ...prev,
@@ -30,6 +42,7 @@ export function HomePage() {
       nutrition: null,
       friction: null,
     });
+    resetPatientInfo();
     toast.info("ล้างข้อมูลการประเมินเรียบร้อยแล้ว");
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -59,13 +72,18 @@ export function HomePage() {
         </div>
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
+        <div className="mb-12">
+          <PatientInfoForm 
+            patientInfo={patientInfo} 
+            onUpdate={updateField} 
+          />
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
-          {/* Main Content Area */}
           <div className="lg:col-span-8 space-y-16">
             {BRADEN_CATEGORIES.map((category, index) => (
-              <section 
-                key={category.id} 
-                className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both" 
+              <section
+                key={category.id}
+                className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
                 style={{ animationDelay: `${index * 150}ms` }}
               >
                 <div className="mb-8">
@@ -96,16 +114,19 @@ export function HomePage() {
               </section>
             ))}
           </div>
-          {/* Sticky Sidebar Container */}
           <aside className="lg:col-span-4 lg:sticky lg:top-28 transition-all duration-300">
-            <ScoreDisplay scores={scores} onReset={handleReset} />
+            <ScoreDisplay 
+              scores={scores} 
+              patientInfo={patientInfo} 
+              onReset={handleReset} 
+            />
           </aside>
         </div>
       </main>
       <footer className="hidden lg:block border-t border-slate-200 mt-20 py-12 bg-white/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-slate-400 text-sm leading-relaxed max-w-lg mx-auto">
-            © {new Date().getFullYear()} Braden Scale Pro. ออกแบบมาเพื่อบุคลากรทางการแพทย์ 
+            © {new Date().getFullYear()} Braden Scale Pro. ออกแบบมาเพื่อบุคลากรทางการแพทย์
             ข้อมูลนี้ใช้ประกอบการตัดสินใจทางคลินิกเท่านั้น
           </p>
         </div>
