@@ -1,6 +1,6 @@
 # Braden Scale Pro
 
-[![[cloudflarebutton]]](https://deploy.workers.cloudflare.com/?url=${repositoryUrl})
+[![[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/punyanutchaothai-cloud/braden-scale-.3)]](https://deploy.workers.cloudflare.com/?url=${repositoryUrl})
 
 A professional web application for Braden Scale assessment, built with modern React, TypeScript, Tailwind CSS, and deployed on Cloudflare Pages/Workers. This full-stack template includes a responsive UI with shadcn/ui components, API routes powered by Hono, and seamless Cloudflare integration.
 
@@ -118,7 +118,7 @@ bun run deploy
 
 This runs `bun run build && wrangler deploy`.
 
-**[cloudflarebutton]**
+**[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/punyanutchaothai-cloud/braden-scale-.3)**
 
 ### Prerequisites
 
