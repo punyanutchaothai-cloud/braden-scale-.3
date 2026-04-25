@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PatientInfo } from '@/hooks/use-patient-info';
-import { User, ClipboardList, Bed, Hospital } from 'lucide-react';
+import { User, ClipboardList, Bed, Hospital, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 interface PatientInfoFormProps {
   patientInfo: PatientInfo;
@@ -51,19 +51,38 @@ export function PatientInfoForm({ patientInfo, onUpdate }: PatientInfoFormProps)
               />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="bed" className="text-xs font-black text-muted-foreground uppercase tracking-widest">
-              หอผู้ป่วย / เตียง
-            </Label>
-            <div className="relative">
-              <Bed className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="bed"
-                placeholder="เช่น อายุรกรรมหญิง / เตียง 12"
-                value={patientInfo.bed}
-                onChange={(e) => onUpdate('bed', e.target.value)}
-                className={cn(inputBaseClasses, "pl-10")}
-              />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="age" className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+                อายุ (ปี)
+              </Label>
+              <div className="relative">
+                <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="age"
+                  type="number"
+                  min="0"
+                  placeholder="65"
+                  value={patientInfo.age}
+                  onChange={(e) => onUpdate('age', e.target.value)}
+                  className={cn(inputBaseClasses, "pl-10")}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bed" className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+                หอผู้ป่วย / เตียง
+              </Label>
+              <div className="relative">
+                <Bed className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="bed"
+                  placeholder="เตียง 12"
+                  value={patientInfo.bed}
+                  onChange={(e) => onUpdate('bed', e.target.value)}
+                  className={cn(inputBaseClasses, "pl-10")}
+                />
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
