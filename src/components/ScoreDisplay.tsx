@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { calculateRiskLevel } from '@/lib/braden-data';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, RotateCcw, Clipboard, CloudUpload, Loader2, ChevronUp, ChevronDown, Clock } from 'lucide-react';
+import { CheckCircle2, RotateCcw, Clipboard, CloudUpload, Loader2, ChevronUp, ChevronDown, Clock, CalendarDays } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { PatientInfo } from '@/hooks/use-patient-info';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -23,7 +23,6 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
   const [isSaving, setIsSaving] = useState(false);
   const { isAuthenticated } = useConvexAuth();
   const saveAssessment = useMutation(api.assessments.saveAssessment);
-  // Sync expanded state with device type initially, but allow toggle
   useEffect(() => {
     if (!isMobile) {
       setIsExpanded(true);
@@ -32,13 +31,12 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
   const answeredCount = useMemo(() => Object.values(scores).filter((v) => v !== null).length, [scores]);
   const isComplete = answeredCount === 6;
   const totalScore = useMemo(() => Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0), [scores]);
-  const risk = useMemo(() => 
+  const risk = useMemo(() =>
     calculateRiskLevel(totalScore, patientInfo.age ? parseInt(patientInfo.age) : undefined),
   [totalScore, patientInfo.age]);
   const completionPercentage = (answeredCount / 6) * 100;
   const nextAssessmentData = useMemo(() => {
     if (!isComplete || !patientInfo.age || parseInt(patientInfo.age) <= 5) return null;
-    // Ensure we have a valid base date from form or fallback to now
     let baseDate: Date;
     try {
       if (patientInfo.date && patientInfo.time) {
@@ -58,11 +56,12 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
       hour: 'numeric',
       minute: '2-digit'
     });
-    return { 
-      formatted: formatter.format(nextDate), 
-      text: risk.nextIntervalText 
+    return {
+      formatted: formatter.format(nextDate),
+      text: risk.nextIntervalText,
+      frequency: risk.assess_frequency
     };
-  }, [isComplete, patientInfo.date, patientInfo.time, patientInfo.age, risk.nextIntervalHours, risk.nextIntervalText]);
+  }, [isComplete, patientInfo.date, patientInfo.time, patientInfo.age, risk.nextIntervalHours, risk.nextIntervalText, risk.assess_frequency]);
   const handleCloudSave = async () => {
     if (!isAuthenticated) {
       toast.error("กรุณาเข้าสู่ระบบเพื่อบันทึกข้อมูลลงคลาวด์");
@@ -182,9 +181,14 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                         risk.border
                       )}
                     >
-                      <div className="flex items-center gap-3 mb-2">
-                        <Clock className={cn("w-5 h-5", risk.color)} />
-                        <h4 className={cn("font-black text-sm", risk.color)}>นัดประเมินครั้งต่อไป</h4>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <Clock className={cn("w-5 h-5", risk.color)} />
+                          <h4 className={cn("font-black text-sm", risk.color)}>นัดประเมินครั้งต่อไป</h4>
+                        </div>
+                        <span className={cn("px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/60 shadow-sm border", risk.color, risk.border)}>
+                          📅 {nextAssessmentData.frequency}
+                        </span>
                       </div>
                       <p className="text-xl font-display font-bold text-foreground mb-1 leading-tight">
                         {nextAssessmentData.formatted}

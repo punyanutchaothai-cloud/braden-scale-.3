@@ -22,14 +22,14 @@ export function HomePage() {
   const [scores, setScores] = useState<Record<string, number | null>>({
     sensory: null, moisture: null, activity: null, mobility: null, nutrition: null, friction: null,
   });
-  const answeredCount = useMemo(() => 
-    Object.values(scores).filter((v) => v !== null).length, 
+  const answeredCount = useMemo(() =>
+    Object.values(scores).filter((v) => v !== null).length,
   [scores]);
   const isComplete = answeredCount === 6;
-  const totalScore = useMemo(() => 
+  const totalScore = useMemo(() =>
     Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0),
   [scores]);
-  const currentRisk = useMemo(() => 
+  const currentRisk = useMemo(() =>
     isComplete ? calculateRiskLevel(totalScore, parseInt(patientInfo.age)) : null,
   [isComplete, totalScore, patientInfo.age]);
   const handleSelect = useCallback((categoryId: string, value: number) => {
@@ -71,9 +71,10 @@ export function HomePage() {
     summaryText += `----------------------------\n`;
     summaryText += `วันที่ประเมิน: ${patientInfo.date} เวลา ${patientInfo.time} น.\n`;
     summaryText += `คะแนนรวม: ${totalScore}/23 คะแนน\n`;
-    summaryText += `ระดับความเสี่ยง: ${currentRisk.label}\n`;
+    summaryText += `ระดับความเสี่ยง: ${currentRisk.label} (${currentRisk.assess_frequency})\n`;
     summaryText += `การวินิจฉัยทางการพยาบาล: ${currentRisk.dx}\n`;
     if (isAdult) {
+      summaryText += `📅 ความถี่ประเมิน: ${currentRisk.assess_frequency}\n`;
       summaryText += `----------------------------\n`;
       summaryText += `🕒 ประเมินครั้งต่อไป: ${nextText} (${currentRisk.nextIntervalText})`;
     }
@@ -89,7 +90,7 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <button onClick={() => setShowLogic(!showLogic)} className="py-3 text-slate-400 hover:text-white text-[10px] font-mono font-bold tracking-wider flex items-center gap-3">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            CLINICAL ENGINE v2.1
+            CLINICAL ENGINE v2.2
           </button>
           <div className="flex items-center gap-4">
             <Authenticated>

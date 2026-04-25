@@ -24,7 +24,7 @@ export const BRADEN_CATEGORIES: BradenCategory[] = [
   {
     id: "moisture",
     title: "ความชื้น (Moisture)",
-    description: "ระดับที่ผิวหนังต้องสัมผัสกับความเปเปียกชื้น",
+    description: "ระดับที่ผิวหนังต้องสัมผัสกับความเปเปิกชื้น",
     options: [
       { value: 1, label: "เปียกชื้นตลอดเวลา (Constantly Moist)", description: "ผิวหนังเปียกชื้นเกือบตลอดเวลาจากเหงื่อ ปัสสาวะ ฯลฯ พบความชื้นทุกครั้งที่พลิกตัวผู้ป่วย" },
       { value: 2, label: "เปียกชื้นมาก (Very Moist)", description: "ผิวหนังเปียกชื้นบ่อยแต่ไม่ตลอดเวลา ต้องเปลี่ยนผ้าปูที่นอนอย่างน้อยวันละ 1 ครั้งต่อเวร" },
@@ -115,6 +115,7 @@ export const getScoreColor = (value: number) => {
 };
 export const calculateRiskLevel = (score: number, age?: number) => {
   const validAge = age !== undefined && !Number.isNaN(age);
+  // Pediatric exclusion (age <= 5)
   if (validAge && age <= 5) {
     return {
       label: "ไม่ประเมิน (อายุ ≤5 ปี)",
@@ -136,6 +137,7 @@ export const calculateRiskLevel = (score: number, age?: number) => {
       ]
     };
   }
+  // Adult Risk Thresholds (age > 5)
   if (score <= 9) return {
     label: "เสี่ยงสูงที่สุด (Severe Risk)",
     color: "text-red-700 dark:text-red-400",
@@ -145,9 +147,9 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     ariaLabel: "ระดับความเสี่ยงสูงที่สุด",
     action: "ต้องการการดูแลอย่างเร่งด่วนและแผนการลดแรงกดทับอย่างเข้มข้นทันที",
     dx: "เสี่ยงต่อการเกิดแผลกดทับอย่างรุนแรง (Severe risk for pressure ulcer)",
-    assess_frequency: "ทุกเวร (Every shift)",
-    nextIntervalHours: 1,
-    nextIntervalText: "ทุก 1 ชั่วโมง",
+    assess_frequency: "ทุกวันทุกเวร",
+    nextIntervalHours: 8,
+    nextIntervalText: "ทุกวันทุกเวร",
     care: [
       "พลิกตัวทุก 1 ชม. และตรวจสอบจุดกดทับอย่างละเอียด",
       "ใช้ที่นอนลดแรงกดทับประสิทธิภาพสูง (High-end Low Air Loss)",
@@ -165,9 +167,9 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     ariaLabel: "ระดับความเสี่ยงสูง",
     action: "กำหนดตารางพลิกตัวที่เข้มงวดและใช้อุปกรณ์รองรับเพื่อลดแรงกดทับ",
     dx: "เสี่ยงสูงต่อการเกิดแผลกดทับ (High risk for pressure ulcer)",
-    assess_frequency: "ทุกเวร (Every shift)",
-    nextIntervalHours: 2,
-    nextIntervalText: "ทุก 2 ชั่วโมง",
+    assess_frequency: "ทุกวันทุกเวร",
+    nextIntervalHours: 8,
+    nextIntervalText: "ทุกวันทุกเวร",
     care: [
       "พลิกตัวทุก 1–2 ชม. ตามตารางที่กำหนด",
       "ใช้ที่นอนลมแบบ Alternating pressure mattress",
@@ -176,7 +178,7 @@ export const calculateRiskLevel = (score: number, age?: number) => {
       "Consult ทีมโภชนาการประเมินภาวะโภชนาการ"
     ]
   };
-  if (score <= 14) return {
+  if (score <= 15) return {
     label: "เสี่ยงปานกลาง (Moderate Risk)",
     color: "text-amber-700 dark:text-amber-400",
     bg: "bg-amber-100/95 dark:bg-amber-950/80",
@@ -185,9 +187,9 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     ariaLabel: "ระดับความเสี่ยงปานกลาง",
     action: "เพิ่มการเฝ้าระวังและพิจารณาใช้อุปกรณ์เสริมเพื่อช่วยลดแรงกดทับ",
     dx: "เสี่ยงต่อการเกิดแผลกดทับ (Moderate risk for pressure ulcer)",
-    assess_frequency: "ทุกวัน (Daily)",
-    nextIntervalHours: 2,
-    nextIntervalText: "ทุก 2 ชั่วโมง",
+    assess_frequency: "ทุกวันทุกเวร",
+    nextIntervalHours: 8,
+    nextIntervalText: "ทุกวันทุกเวร",
     care: [
       "พลิกตัวทุก 2 ชม. อย่างเคร่งครัด",
       "ใช้ที่นอนลดแรงกดทับมาตรฐาน",
@@ -205,9 +207,9 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     ariaLabel: "ระดับความเสี่ยงต่ำ",
     action: "รักษาสุขอนามัยของผิวหนังและประเมินซ้ำตามระยะ",
     dx: "เสี่ยงต่ำต่อการเกิดแผลกดทับ (Mild risk for pressure ulcer)",
-    assess_frequency: "ทุกวัน (Daily)",
-    nextIntervalHours: 4,
-    nextIntervalText: "ทุก 4 ชั่วโมง",
+    assess_frequency: "ทุกวันทุกเวร",
+    nextIntervalHours: 8,
+    nextIntervalText: "ทุกวันทุกเวร",
     care: [
       "พลิกตัวทุก 2–3 ชม. และส่งเสริมการเคลื่อนไหว",
       "ดูแลผิวหนังให้สะอาดและแห้งอยู่เสมอ",
@@ -215,6 +217,7 @@ export const calculateRiskLevel = (score: number, age?: number) => {
       "ให้ความรู้ผู้ป่วยและญาติเรื่องการป้องกันแผลกดทับ"
     ]
   };
+  // No Risk Score >= 19
   return {
     label: "ไม่เสี่ยง (No Risk)",
     color: "text-emerald-700 dark:text-emerald-400",
@@ -224,9 +227,9 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     ariaLabel: "ไม่มีความเสี่ยงที่ชัดเจน",
     action: "ดูแลตามมาตรฐานการพยาบาลทั่วไป",
     dx: "ระดับความเสี่ยงปกติ (No current risk for pressure ulcer)",
-    assess_frequency: "สัปดาห์ละครั้ง (Weekly)",
-    nextIntervalHours: 24,
-    nextIntervalText: "รายวัน",
+    assess_frequency: "สัปดาห์ละครั้ง",
+    nextIntervalHours: 168,
+    nextIntervalText: "สัปดาห์ละครั้ง",
     care: [
       "ประเมินสภาพผิวหนังเป็นประจำทุกวัน (Daily assessment)",
       "ส่งเสริมการเคลื่อนไหวร่างกายตามปกติ",
