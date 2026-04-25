@@ -77,9 +77,39 @@ export const BRADEN_CATEGORIES: BradenCategory[] = [
   },
 ];
 export const calculateRiskLevel = (score: number) => {
-  if (score <= 9) return { label: "เสี่ยงสูงมาก", color: "text-red-600", bg: "bg-red-50", border: "border-red-200" };
-  if (score <= 12) return { label: "เสี่ยงสูง", color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-200" };
-  if (score <= 14) return { label: "เสี่ยงปานกลาง", color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" };
-  if (score <= 18) return { label: "เสี่ยงต่ำ", color: "text-yellow-600", bg: "bg-yellow-50", border: "border-yellow-200" };
-  return { label: "ไม่มีความเสี่ยง", color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200" };
+  if (score <= 9) return { 
+    label: "เสี่ยงสูงมาก", 
+    color: "text-red-600", 
+    bg: "bg-red-50", 
+    border: "border-red-200",
+    action: "ต้องมีการเฝ้าระวังอย่างใกล้ชิดและใช้มาตรการป้องกันแผลกดทับเต็มรูปแบบทันที"
+  };
+  if (score <= 12) return { 
+    label: "เสี่ยงสูง", 
+    color: "text-orange-600", 
+    bg: "bg-orange-50", 
+    border: "border-orange-200",
+    action: "ควรจัดตารางการเปลี่ยนท่านอนอย่างเข้มงวดและใช้อุปกรณ์ลดแรงกดทับ"
+  };
+  if (score <= 14) return { 
+    label: "เสี่ยงปานกลาง", 
+    color: "text-amber-600", 
+    bg: "bg-amber-50", 
+    border: "border-amber-200",
+    action: "เฝ้าระวังและพิจารณาใช้อุปกรณ์เสริมเพื่อลดแรงกดทับในจุดที่เสี่ยง"
+  };
+  if (score <= 18) return { 
+    label: "เสี่ยงต่ำ", 
+    color: "text-yellow-600", 
+    bg: "bg-yellow-50", 
+    border: "border-yellow-200",
+    action: "หมั่นสังเกตสภาพผิวหนังและประเมินซ้ำตามระยะเวลาที่กำหนด"
+  };
+  return { 
+    label: "ไม่มีความเสี่ยง", 
+    color: "text-emerald-600", 
+    bg: "bg-emerald-50", 
+    border: "border-emerald-200",
+    action: "ประเมินซ้ำเมื่อมีการเปลี่ยนแปลงของสภาวะสุขภาพผู้ป่วย"
+  };
 };

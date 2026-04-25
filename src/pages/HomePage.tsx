@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BRADEN_CATEGORIES } from '@/lib/braden-data';
+import React, { useState, useEffect, useCallback } from 'react';
+import { BRADEN_CATEGORIES, calculateRiskLevel } from '@/lib/braden-data';
 import { SelectableCard } from '@/components/SelectableCard';
 import { ScoreDisplay } from '@/components/ScoreDisplay';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -9,7 +9,7 @@ import { PatientInfoForm } from '@/components/PatientInfoForm';
 import { usePatientInfo } from '@/hooks/use-patient-info';
 import { ShieldCheck, Info } from 'lucide-react';
 export function HomePage() {
-  const { patientInfo, updateField, resetPatientInfo, isValid: isPatientValid } = usePatientInfo();
+  const { patientInfo, updateField, resetPatientInfo, isPatientValid } = usePatientInfo();
   const [scores, setScores] = useState<Record<string, number | null>>({
     sensory: null,
     moisture: null,
@@ -21,7 +21,8 @@ export function HomePage() {
   const answeredCount = Object.values(scores).filter((v) => v !== null).length;
   const isComplete = answeredCount === 6;
   useEffect(() => {
-    if (isComplete && !isPatientValid()) {
+    // FIX: isPatientValid is now a boolean, not a function
+    if (isComplete && !isPatientValid) {
       toast.warning("กรุณากรอกชื่อและ HN ผู้ป่วยเพื่อให้การประเมินสมบูรณ์", {
         id: "validation-warning",
       });
@@ -46,8 +47,35 @@ export function HomePage() {
     toast.info("ล้างข้อมูลการประเมินเรียบร้อยแล้ว");
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+  const handleCopySummary = useCallback(() => {
+    if (!isComplete) {
+      toast.error("กรุณาประเมินให้ครบทั้ง 6 หัวข้อก่อนคัดลอกสรุป");
+      return;
+    }
+    const totalScore = Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0);
+    const risk = calculateRiskLevel(totalScore);
+    let summaryText = `[สรุปผลการประเมิน Braden Scale]\n`;
+    summaryText += `วันที่: ${patientInfo.date} เวลา: ${patientInfo.time}\n`;
+    summaryText += `ผู้ป่วย: ${patientInfo.name || 'ไม่ได้ระบุ'}\n`;
+    summaryText += `HN: ${patientInfo.hn || 'ไม่ได้ระบุ'} | เตียง: ${patientInfo.bed || 'ไม่ได้ระบุ'}\n`;
+    summaryText += `----------------------------\n`;
+    BRADEN_CATEGORIES.forEach(cat => {
+      const val = scores[cat.id];
+      const opt = cat.options.find(o => o.value === val);
+      summaryText += `${cat.title}: ${val} คะแนน (${opt?.label || '-'})\n`;
+    });
+    summaryText += `----------------------------\n`;
+    summaryText += `คะแนนรวม: ${totalScore} คะแนน\n`;
+    summaryText += `ระดับความเสี่ยง: ${risk.label}\n`;
+    summaryText += `คำแนะนำ: ${risk.action}\n`;
+    navigator.clipboard.writeText(summaryText).then(() => {
+      toast.success("คัดลอกสรุปผลการประเมินไปยังคลิปบอร์ดแล้ว");
+    }).catch(() => {
+      toast.error("ไม่สามารถคัดลอกข้อมูลได้");
+    });
+  }, [scores, isComplete, patientInfo]);
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-40 lg:pb-12">
+    <div className="min-h-screen bg-slate-50/50 pb-48 lg:pb-12">
       <LogicPreview />
       <ThemeToggle />
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm transition-shadow duration-300">
@@ -73,9 +101,9 @@ export function HomePage() {
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
         <div className="mb-12">
-          <PatientInfoForm 
-            patientInfo={patientInfo} 
-            onUpdate={updateField} 
+          <PatientInfoForm
+            patientInfo={patientInfo}
+            onUpdate={updateField}
           />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
@@ -115,10 +143,12 @@ export function HomePage() {
             ))}
           </div>
           <aside className="lg:col-span-4 lg:sticky lg:top-28 transition-all duration-300">
-            <ScoreDisplay 
-              scores={scores} 
-              patientInfo={patientInfo} 
-              onReset={handleReset} 
+            <ScoreDisplay
+              scores={scores}
+              patientInfo={patientInfo}
+              onReset={handleReset}
+              onCopySummary={handleCopySummary}
+              isPatientValid={isPatientValid}
             />
           </aside>
         </div>
