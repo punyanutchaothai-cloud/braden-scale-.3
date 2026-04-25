@@ -37,10 +37,27 @@ export function HomePage() {
   };
   const handleCopySummary = useCallback(() => {
     if (!isComplete || !currentRisk) return;
-    const summaryText = `[BRADEN ASSESSMENT]\nDate: ${patientInfo.date}\nPatient: ${patientInfo.name}\nScore: ${totalScore}/23\nRisk: ${currentRisk.label}\nDX: ${currentRisk.dx}`;
+    const now = new Date(`${patientInfo.date}T${patientInfo.time}:00`);
+    const nextTime = new Date(now.getTime() + currentRisk.nextIntervalHours * 3600000);
+    const formatThaiDateTime = (date: Date, intervalText: string) => {
+      const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+      const day = date.getDate();
+      const month = thaiMonths[date.getMonth()];
+      const year = date.getFullYear() + 543;
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${day} ${month} ${year} ${hours}:${minutes} ${intervalText}`;
+    };
+    const nextText = formatThaiDateTime(nextTime, currentRisk.nextIntervalText);
+    const ageNum = parseInt(patientInfo.age || '0', 10);
+    const showNext = patientInfo.age && ageNum > 5;
+    let summaryText = `[BRADEN ASSESSMENT]\nDate: ${patientInfo.date} ${patientInfo.time}\nPatient: ${patientInfo.name} (${patientInfo.hn})\nHN: ${patientInfo.hn}\nAge: ${patientInfo.age} ปี\nScore: ${totalScore}/23\nRisk: ${currentRisk.label}\nDX: ${currentRisk.dx}`;
+    if (showNext) {
+      summaryText += `\nNext: ประเมินครั้งต่อไป ${nextText}`;
+    }
     navigator.clipboard.writeText(summaryText);
     toast.success("คัดลอกสรุปเรียบร้อยแล้ว");
-  }, [isComplete, patientInfo, totalScore, currentRisk]);
+  }, [isComplete, patientInfo, totalScore, currentRisk]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className={cn(
       "min-h-screen transition-all duration-1000 ease-out pb-64 lg:pb-24",

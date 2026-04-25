@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { calculateRiskLevel } from '@/lib/braden-data';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, RotateCcw, Clipboard, CloudUpload, Loader2, ChevronUp, ChevronDown } from 'lucide-react';
+import { CheckCircle2, RotateCcw, Clipboard, CloudUpload, Loader2, ChevronUp, ChevronDown, Clock } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { PatientInfo } from '@/hooks/use-patient-info';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -65,6 +65,20 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
     }
   };
   const isChild = patientInfo.age && parseInt(patientInfo.age) <= 5;
+
+  const thaiMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const formatThaiDateTime = (date: Date, nextIntervalText: string) => {
+    const day = date.getDate();
+    const month = thaiMonths[date.getMonth()];
+    const yearBE = date.getFullYear() + 543;
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${day} ${month} ${yearBE} ${hours}:${minutes} (${nextIntervalText})`;
+  };
+  const currentDateTime = patientInfo.date && patientInfo.time ? new Date(`${patientInfo.date}T${patientInfo.time}:00`) : null;
+  const nextDateTime = currentDateTime && risk.nextIntervalHours ? new Date(currentDateTime.getTime() + risk.nextIntervalHours * 3600000) : null;
+  const nextDisplayText = nextDateTime && risk.nextIntervalText ? formatThaiDateTime(nextDateTime, risk.nextIntervalText) : '';
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 lg:relative lg:bottom-auto lg:z-0 lg:block p-0 sm:p-4 lg:p-0 pb-safe sm:pb-4 lg:pb-0" aria-live="polite">
       <Card className={cn(
@@ -131,6 +145,26 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                         </div>
                       </div>
                     </div>
+                  )}
+                  {isComplete && !isChild && nextDisplayText && (
+                    <AnimatePresence>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                        className={`mt-6 p-6 rounded-2xl bg-gradient-to-br from-blue-50/80 to-indigo-100/80 dark:from-slate-800/60 dark:to-slate-900/60 border border-blue-200/50 dark:border-slate-700/50 shadow-2xl backdrop-blur-sm ${risk.glow} border-l-[6px] border-indigo-500/80`}
+                      >
+                        <div className="flex gap-4 items-start">
+                          <Clock className={`w-8 h-8 text-blue-600 flex-shrink-0 mt-0.5 animate-pulse ${risk.color}`} />
+                          <div>
+                            <h4 className="text-lg md:text-xl font-black text-foreground mb-1 tracking-tight">ประเมินครั้งต่อไป</h4>
+                            <p className="text-base md:text-lg font-bold text-blue-900 dark:text-blue-300 leading-tight">
+                              ประเมินครั้งต่อไป: {nextDisplayText}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </AnimatePresence>
                   )}
                 </motion.div>
               )}
