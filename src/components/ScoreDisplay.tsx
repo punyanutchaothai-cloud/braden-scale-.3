@@ -2,9 +2,10 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { calculateRiskLevel } from '@/lib/braden-data';
 import { cn } from '@/lib/utils';
-import { AlertCircle, RotateCcw, ShieldAlert, User, AlertTriangle, Clipboard } from 'lucide-react';
+import { AlertCircle, RotateCcw, ShieldAlert, User, AlertTriangle, Clipboard, Stethoscope } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { PatientInfo } from '@/hooks/use-patient-info';
+import { motion, AnimatePresence } from 'framer-motion';
 interface ScoreDisplayProps {
   scores: Record<string, number | null>;
   patientInfo: PatientInfo;
@@ -26,7 +27,7 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
       <Card
         className={cn(
           "rounded-none sm:rounded-3xl border-t sm:border-2 shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition-all duration-700 ease-in-out overflow-hidden",
-          isComplete ? cn(risk.bg, risk.border, "scale-[1.02]") : "bg-card/95 border-border"
+          isComplete ? cn(risk.bg, risk.border, "scale-[1.01]") : "bg-card/95 border-border"
         )}
       >
         <CardContent className="p-5 md:p-8 backdrop-blur-3xl relative">
@@ -88,26 +89,49 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              {isComplete ? (
-                <div
-                  className={cn(
-                    "flex items-start gap-3 p-4 rounded-2xl border-l-[6px] text-xs leading-relaxed transition-all duration-700 bg-white/40 dark:bg-black/40 backdrop-blur-xl",
-                    risk.border, risk.color
-                  )}
-                  role="alert"
-                >
-                  <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-black text-xs mb-0.5 uppercase tracking-wide">ข้อแนะนำทางคลินิก</p>
-                    <p className="opacity-90 font-medium">{risk.action}</p>
+              <AnimatePresence mode="wait">
+                {isComplete ? (
+                  <motion.div
+                    key="complete-panel"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.5, ease: "circOut" }}
+                    className="space-y-3"
+                  >
+                    <div
+                      className={cn(
+                        "flex items-start gap-3 p-4 rounded-2xl border-l-[6px] text-xs leading-relaxed transition-all duration-700 bg-white/40 dark:bg-black/40 backdrop-blur-xl",
+                        risk.border, risk.color
+                      )}
+                      role="alert"
+                    >
+                      <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-black text-[10px] mb-0.5 uppercase tracking-wide">ข้อแนะนำทางคลินิก</p>
+                        <p className="opacity-90 font-medium">{risk.action}</p>
+                      </div>
+                    </div>
+                    <div
+                      className={cn(
+                        "flex items-start gap-3 p-4 rounded-2xl border-2 border-dashed text-xs leading-relaxed transition-all duration-700 bg-background/50 backdrop-blur-xl",
+                        risk.border, risk.color
+                      )}
+                    >
+                      <Stethoscope className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-black text-[10px] mb-0.5 uppercase tracking-wide">คำวินิจฉัยทางการพยาบาล</p>
+                        <p className="opacity-90 font-bold italic">{risk.diagnosis}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="flex items-center gap-2 p-4 rounded-2xl bg-muted/50 border-2 border-dashed border-border text-muted-foreground text-[10px] font-bold justify-center">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>กรุณาตอบให้ครบทั้ง 6 หมวดหมู่</span>
                   </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 p-4 rounded-2xl bg-muted/50 border-2 border-dashed border-border text-muted-foreground text-[10px] font-bold justify-center">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>กรุณาตอบให้ครบทั้ง 6 หมวดหมู่</span>
-                </div>
-              )}
+                )}
+              </AnimatePresence>
               <div className="flex gap-2">
                 <button
                   onClick={onCopySummary}
@@ -127,7 +151,7 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                   className="px-4 bg-background hover:bg-muted text-muted-foreground rounded-xl transition-all duration-300 text-[11px] font-black py-3.5 flex gap-2 items-center justify-center border-2 border-border/50"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">เริ่มใหม่</span>
+                  <span className="hidden sm:inline">ล้างข้อมูล</span>
                 </button>
               </div>
             </div>

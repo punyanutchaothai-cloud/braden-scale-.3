@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PatientInfo } from '@/hooks/use-patient-info';
-import { User, ClipboardList } from 'lucide-react';
+import { User, ClipboardList, Bed, Hospital } from 'lucide-react';
 import { cn } from '@/lib/utils';
 interface PatientInfoFormProps {
   patientInfo: PatientInfo;
@@ -16,7 +16,7 @@ export function PatientInfoForm({ patientInfo, onUpdate }: PatientInfoFormProps)
       <CardHeader className="pb-4 bg-muted/20 border-b">
         <CardTitle className="text-lg font-bold text-foreground flex items-center gap-2">
           <ClipboardList className="w-5 h-5 text-teal-600" />
-          ข้อมูลผู้ป่วย (Patient Identification)
+          ระบุข้อมูลผู้ป่วย (Patient Identification)
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-6">
@@ -29,7 +29,7 @@ export function PatientInfoForm({ patientInfo, onUpdate }: PatientInfoFormProps)
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 id="name"
-                placeholder="ระบุชื่อจริงและนามสกุล"
+                placeholder="ระบุชื่อและนามสกุลผู้ป่วย"
                 value={patientInfo.name}
                 onChange={(e) => onUpdate('name', e.target.value)}
                 className={cn(inputBaseClasses, "pl-10")}
@@ -38,27 +38,33 @@ export function PatientInfoForm({ patientInfo, onUpdate }: PatientInfoFormProps)
           </div>
           <div className="space-y-2">
             <Label htmlFor="hn" className="text-xs font-black text-muted-foreground uppercase tracking-widest">
-              เลขที่โรงพยาบาล (HN)
+              เลขประจำตัวผู้ป่วย (HN)
             </Label>
-            <Input
-              id="hn"
-              placeholder="เช่น 123456"
-              value={patientInfo.hn}
-              onChange={(e) => onUpdate('hn', e.target.value)}
-              className={inputBaseClasses}
-            />
+            <div className="relative">
+              <Hospital className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                id="hn"
+                placeholder="ระบุเลข HN 6-10 หลัก"
+                value={patientInfo.hn}
+                onChange={(e) => onUpdate('hn', e.target.value)}
+                className={cn(inputBaseClasses, "pl-10")}
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="bed" className="text-xs font-black text-muted-foreground uppercase tracking-widest">
               หอผู้ป่วย / เตียง
             </Label>
-            <Input
-              id="bed"
-              placeholder="เช่น อายุรกรรมชาย / เตียง 05"
-              value={patientInfo.bed}
-              onChange={(e) => onUpdate('bed', e.target.value)}
-              className={inputBaseClasses}
-            />
+            <div className="relative">
+              <Bed className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                id="bed"
+                placeholder="เช่น อายุรกรรมหญิง / เตียง 12"
+                value={patientInfo.bed}
+                onChange={(e) => onUpdate('bed', e.target.value)}
+                className={cn(inputBaseClasses, "pl-10")}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -75,7 +81,7 @@ export function PatientInfoForm({ patientInfo, onUpdate }: PatientInfoFormProps)
             </div>
             <div className="space-y-2">
               <Label htmlFor="time" className="text-xs font-black text-muted-foreground uppercase tracking-widest">
-                เวลา
+                เวลาที่ประเมิน
               </Label>
               <Input
                 id="time"

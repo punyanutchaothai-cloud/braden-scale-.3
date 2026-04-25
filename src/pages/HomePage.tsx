@@ -28,12 +28,12 @@ export function HomePage() {
   useEffect(() => {
     if (isComplete && !isPatientValid) {
       toast.warning("ข้อมูลผู้ป่วยไม่ครบถ้วน", {
-        description: "กรุณาระบุชื่อและเลข HN เพื่อการบันทึกข้อมูลทางคลินิกที่สมบูรณ์",
+        description: "กรุณาระบุชื่อและเลข HN เพื่อการบันทึกข้อมูลที่สมบูรณ์",
         id: "validation-warning",
       });
     }
     if (isComplete) {
-      toast.success("ประเมินเสร็จสิ้น", {
+      toast.success("การประเมินเสร็จสิ้น", {
         description: `ระดับความเสี่ยง: ${currentRisk?.label}`,
         duration: 5000,
       });
@@ -55,7 +55,7 @@ export function HomePage() {
       friction: null,
     });
     resetPatientInfo();
-    toast.info("ล้างข้อมูลการประเมินแล้ว");
+    toast.info("ล้างข้อมูลการประเมินเรียบร้อยแล้ว");
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const handleCopySummary = useCallback(() => {
@@ -64,10 +64,10 @@ export function HomePage() {
       return;
     }
     const risk = calculateRiskLevel(totalScore);
-    let summaryText = `[BRADEN SCALE ASSESSMENT SUMMARY / สรุปผลการประเมิน Braden Scale]\n`;
-    summaryText += `Clinical Timestamp: ${patientInfo.date} @ ${patientInfo.time}\n`;
-    summaryText += `Patient / ผู้ป่วย: ${patientInfo.name || 'N/A'}\n`;
-    summaryText += `HN: ${patientInfo.hn || 'N/A'} | Ward/Bed: ${patientInfo.bed || 'N/A'}\n`;
+    let summaryText = `[สรุปผลการประเมิน BRADEN SCALE / ASSESSMENT SUMMARY]\n`;
+    summaryText += `วันที่ประเมิน: ${patientInfo.date} เวลา ${patientInfo.time}\n`;
+    summaryText += `ชื่อผู้ป่วย: ${patientInfo.name || 'N/A'}\n`;
+    summaryText += `HN: ${patientInfo.hn || 'N/A'} | เตียง: ${patientInfo.bed || 'N/A'}\n`;
     summaryText += `--------------------------------------------\n`;
     BRADEN_CATEGORIES.forEach(cat => {
       const val = scores[cat.id];
@@ -75,12 +75,12 @@ export function HomePage() {
       summaryText += `${cat.title}: ${val} (${opt?.label || '-'})\n`;
     });
     summaryText += `--------------------------------------------\n`;
-    summaryText += `TOTAL SCORE / คะแนนรวม: ${totalScore}/23\n`;
-    summaryText += `RISK LEVEL / ระดับความเสี่ยง: ${risk.label}\n`;
-    summaryText += `RECOMMENDED ACTION / ข้อแนะนำ: ${risk.action}\n`;
+    summaryText += `คะแนนรวม (TOTAL SCORE): ${totalScore}/23\n`;
+    summaryText += `ระดับความเสี่ยง (RISK LEVEL): ${risk.label}\n`;
+    summaryText += `คำวินิจฉัย (DIAGNOSIS): ${risk.diagnosis}\n`;
+    summaryText += `ข้อแนะนำ (ACTION): ${risk.action}\n`;
     navigator.clipboard.writeText(summaryText).then(() => {
       toast.success("คัดลอกสรุปผลลงคลิปบอร์ดแล้ว");
-      console.log(`[Clinical Audit] Summary generated for ${patientInfo.hn}. Risk: ${risk.label}`);
     }).catch(() => {
       toast.error("เกิดข้อผิดพลาดในการคัดลอก");
     });
@@ -98,11 +98,11 @@ export function HomePage() {
           >
             <div className="flex items-center gap-3">
               <span className="flex h-2 w-2 rounded-full bg-teal-500 animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.8)]" />
-              CLINICAL ALGORITHM ENGINE (Thai Optimized)
+              อัลกอริทึมการคำนวณทางการแพทย์ (Thai Medical Algorithm)
             </div>
             <div className="flex items-center gap-2">
               {showLogic ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              <span>{showLogic ? 'ปิดส่วนอัลกอริทึม' : 'แสดงอัลกอริทึม'}</span>
+              <span>{showLogic ? 'ปิดส่วนอัลกอริทึม' : 'ตรวจสอบอัลกอริทึม'}</span>
             </div>
           </button>
         </div>
@@ -134,13 +134,13 @@ export function HomePage() {
                   {isComplete && <Activity className={cn("w-5 h-5 animate-bounce", currentRisk?.color)} />}
                 </h1>
                 <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.3em]">
-                  Nursing Decision Support System
+                  ระบบสนับสนุนการตัดสินใจทางการพยาบาล
                 </p>
               </div>
             </div>
             <div className="hidden lg:flex items-center gap-3 text-xs text-muted-foreground font-black bg-muted/50 px-5 py-2.5 rounded-full border border-border/50">
               <Info className="w-4 h-4 text-primary" />
-              <span>VALIDATED CLINICAL INSTRUMENT (THAI)</span>
+              <span>เครื่องมือประเมินมาตรฐานทางคลินิก (Validated Instrument)</span>
             </div>
           </div>
         </div>
@@ -205,8 +205,8 @@ export function HomePage() {
             ข้อกำหนดและเงื่อนไขการใช้งานทางคลินิก
           </p>
           <p className="text-muted-foreground/60 text-[10px] leading-relaxed max-w-2xl mx-auto font-medium">
-            ซอฟต์แวร์นี้ออกแบบมาเพื่อใช้งานโดยบุคลากรทางการแพทย์ที่ผ่านการฝึกอบรมเท่านั้น 
-            ผลการประเมินควรได้รับการตรวจสอบทางคลินิกและบูรณาการเข้ากับแผนการพยาบาลที่ครอบคลุมของผู้ป่วย 
+            ซอฟต์แวร์นี้ออกแบบมาเพื่อใช้งานโดยบุคลากรทางการแพทย์ที่ผ่านการฝึกอบรมเท่านั้น
+            ผลการประเมินควรได้รับการตรวจสอบทางคลินิกและบูรณาการเข้ากับแผนการพยาบาลที่ครอบคลุมของผู้ป่วย
             © {new Date().getFullYear()} Braden Scale Pro.
           </p>
         </div>

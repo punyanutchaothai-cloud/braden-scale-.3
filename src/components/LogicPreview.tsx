@@ -9,14 +9,14 @@ export function LogicPreview() {
  * Braden Scale Risk Calculation Logic (Thai Locale)
  * Clinical Standard Assessment System
  */
-const calculateRiskLevel = (score: number) => {
+const getRiskLevel = (score: number) => {
   if (score <= 9)  return "เสี่ยงสูงมาก (Severe Risk)";
   if (score <= 12) return "เสี่ยงสูง (High Risk)";
   if (score <= 14) return "เสี่ยงปานกลาง (Moderate Risk)";
   if (score <= 18) return "เสี่ยงต่ำ (Mild Risk)";
   return "ไม่มีความเสี่ยง (No Risk)";
 };
-// Total Score = Sum of 6 categories (Min: 6, Max: 23)
+// คะแนนรวม = ผลรวมของหมวดหมู่ทั้ง 6 ด้าน (ต่ำสุด: 6, สูงสุด: 23)
 const total = sensory + moisture + activity +
               mobility + nutrition + friction;`;
   const handleCopy = async () => {
@@ -54,13 +54,13 @@ const total = sensory + moisture + activity +
           className="text-slate-400 hover:text-white hover:bg-slate-800 self-start md:self-center"
         >
           {copied ? <Check className="w-4 h-4 mr-2 text-emerald-400" /> : <Copy className="w-4 h-4 mr-2" />}
-          {copied ? "คัดลอกแล้ว" : "คัดลอกโค้ดอัลกอริทึม"}
+          {copied ? "คัดลอกโค้ดแล้ว" : "คัดลอกโค้ดอัลกอริทึม"}
         </Button>
       </div>
       <ScrollArea className="w-full rounded-lg border border-slate-800 bg-slate-950/50 shadow-inner">
         <pre className="p-4 sm:p-6 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto">
           <code className="text-slate-300">
-            <span className="text-slate-500 italic">{"// นิยามเกณฑ์การตัดสินใจทางคลินิก (Clinical Decision)"}</span>{"\n"}
+            <span className="text-slate-500 italic">{"// นิยามเกณฑ์การตัดสินใจทางคลินิก (Clinical Decision Logic)"}</span>{"\n"}
             <span className="text-sky-400">const</span> <span className="text-emerald-400">getRiskLevel</span> = (<span className="text-orange-300">score</span>: <span className="text-yellow-400">number</span>) =&gt; {"{"}{"\n"}
             {"  "}<span className="text-sky-400">if</span> (score &lt;= <span className="text-purple-400">9</span>)  <span className="text-sky-400">return</span> <span className="text-amber-300">"เสี่ยงสูงมาก"</span>;{"\n"}
             {"  "}<span className="text-sky-400">if</span> (score &lt;= <span className="text-purple-400">12</span>) <span className="text-sky-400">return</span> <span className="text-amber-300">"เสี่ยงสูง"</span>;{"\n"}
@@ -69,7 +69,7 @@ const total = sensory + moisture + activity +
             {"  "}{"\n"}
             {"  "}<span className="text-sky-400">return</span> <span className="text-amber-300">"ไม่มีความเสี่ยง"</span>;{"\n"}
             {"}"};{"\n\n"}
-            <span className="text-slate-500 italic">{"// ผลรวมของหมวดหมู่ทางคลินิกทั้ง 6 ด้าน"}</span>{"\n"}
+            <span className="text-slate-500 italic">{"// ผลรวมคะแนนจากหมวดหมู่ทางคลินิกทั้ง 6 ด้าน"}</span>{"\n"}
             <span className="text-sky-400">const</span> <span className="text-emerald-400">totalBradenScore</span> = categories.<span className="text-emerald-400">reduce</span>((acc, val) =&gt; acc + val, <span className="text-purple-400">0</span>);
           </code>
         </pre>
