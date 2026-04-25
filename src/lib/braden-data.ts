@@ -24,7 +24,7 @@ export const BRADEN_CATEGORIES: BradenCategory[] = [
   {
     id: "moisture",
     title: "ความชื้น (Moisture)",
-    description: "ระดับที่ผิวหนังต้องสัมผัสกับความเปียกชื้น",
+    description: "ระดับที่ผิวหนังต้องสัมผัสกับความเปเปียกชื้น",
     options: [
       { value: 1, label: "เปียกชื้นตลอดเวลา (Constantly Moist)", description: "ผิวหนังเปียกชื้นเกือบตลอดเวลาจากเหงื่อ ปัสสาวะ ฯลฯ พบความชื้นทุกครั้งที่พลิกตัวผู้ป่วย" },
       { value: 2, label: "เปียกชื้นมาก (Very Moist)", description: "ผิวหนังเปียกชื้นบ่อยแต่ไม่ตลอดเวลา ต้องเปลี่ยนผ้าปูที่นอนอย่างน้อยวันละ 1 ครั้งต่อเวร" },
@@ -114,9 +114,7 @@ export const getScoreColor = (value: number) => {
   }
 };
 export const calculateRiskLevel = (score: number, age?: number) => {
-  // Use Number.isNaN to ensure strict validity
   const validAge = age !== undefined && !Number.isNaN(age);
-  // Age-based exclusion for children ≤5 years
   if (validAge && age <= 5) {
     return {
       label: "ไม่ประเมิน (อายุ ≤5 ปี)",
@@ -138,7 +136,6 @@ export const calculateRiskLevel = (score: number, age?: number) => {
       ]
     };
   }
-  // Clinical Logic (Standard Braden Thresholds)
   if (score <= 9) return {
     label: "เสี่ยงสูงที่สุด (Severe Risk)",
     color: "text-red-700 dark:text-red-400",
@@ -229,7 +226,7 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     dx: "ระดับความเสี่ยงปกติ (No current risk for pressure ulcer)",
     assess_frequency: "สัปดาห์ละครั้ง (Weekly)",
     nextIntervalHours: 24,
-    nextIntervalText: "รายวัน (Daily)",
+    nextIntervalText: "รายวัน",
     care: [
       "ประเมินสภาพผิวหนังเป็นประจำทุกวัน (Daily assessment)",
       "ส่งเสริมการเคลื่อนไหวร่างกายตามปกติ",

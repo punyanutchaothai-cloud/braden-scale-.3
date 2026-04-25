@@ -32,6 +32,24 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
   const totalScore = Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0);
   const risk = calculateRiskLevel(totalScore, patientInfo.age ? parseInt(patientInfo.age) : undefined);
   const completionPercentage = (answeredCount / 6) * 100;
+  const nextAssessmentData = useMemo(() => {
+    if (!isComplete) return null;
+    const baseDate = patientInfo.date && patientInfo.time 
+      ? new Date(`${patientInfo.date}T${patientInfo.time}`) 
+      : new Date();
+    const nextDate = new Date(baseDate.getTime() + (risk.nextIntervalHours * 3600000));
+    const formatter = new Intl.DateTimeFormat('th-TH', { 
+      day: 'numeric', 
+      month: 'short', 
+      year: 'numeric', 
+      hour: 'numeric', 
+      minute: '2-digit' 
+    });
+    const formatted = formatter.format(nextDate);
+    // Debug for transparency
+    console.log(`Braden Engine: Total Score ${totalScore}, Next Interval ${risk.nextIntervalHours}h, Date: ${formatted}`);
+    return { formatted, text: risk.nextIntervalText };
+  }, [isComplete, patientInfo.date, patientInfo.time, risk.nextIntervalHours, risk.nextIntervalText, totalScore]);
   const handleCloudSave = async () => {
     if (!isAuthenticated) {
       toast.error("กรุณาเข้าสู่ระบบเพื่อบันทึกข้อมูลลงคลาวด์");
@@ -65,20 +83,6 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
     }
   };
   const isChild = patientInfo.age && parseInt(patientInfo.age) <= 5;
-
-  const thaiMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const formatThaiDateTime = (date: Date, nextIntervalText: string) => {
-    const day = date.getDate();
-    const month = thaiMonths[date.getMonth()];
-    const yearBE = date.getFullYear() + 543;
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${day} ${month} ${yearBE} ${hours}:${minutes} (${nextIntervalText})`;
-  };
-  const currentDateTime = patientInfo.date && patientInfo.time ? new Date(`${patientInfo.date}T${patientInfo.time}:00`) : null;
-  const nextDateTime = currentDateTime && risk.nextIntervalHours ? new Date(currentDateTime.getTime() + risk.nextIntervalHours * 3600000) : null;
-  const nextDisplayText = nextDateTime && risk.nextIntervalText ? formatThaiDateTime(nextDateTime, risk.nextIntervalText) : '';
-
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 lg:relative lg:bottom-auto lg:z-0 lg:block p-0 sm:p-4 lg:p-0 pb-safe sm:pb-4 lg:pb-0" aria-live="polite">
       <Card className={cn(
@@ -146,25 +150,26 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                       </div>
                     </div>
                   )}
-                  {isComplete && !isChild && nextDisplayText && (
-                    <AnimatePresence>
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, ease: 'easeOut' }}
-                        className={`mt-6 p-6 rounded-2xl bg-gradient-to-br from-blue-50/80 to-indigo-100/80 dark:from-slate-800/60 dark:to-slate-900/60 border border-blue-200/50 dark:border-slate-700/50 shadow-2xl backdrop-blur-sm ${risk.glow} border-l-[6px] border-indigo-500/80`}
-                      >
-                        <div className="flex gap-4 items-start">
-                          <Clock className={`w-8 h-8 text-blue-600 flex-shrink-0 mt-0.5 animate-pulse ${risk.color}`} />
-                          <div>
-                            <h4 className="text-lg md:text-xl font-black text-foreground mb-1 tracking-tight">ประเมินครั้งต่อไป</h4>
-                            <p className="text-base md:text-lg font-bold text-blue-900 dark:text-blue-300 leading-tight">
-                              ประเมินครั้งต่อไป: {nextDisplayText}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    </AnimatePresence>
+                  {isComplete && !isChild && nextAssessmentData && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }} 
+                      animate={{ opacity: 1, scale: 1, y: 0 }} 
+                      className={cn(
+                        "mt-4 p-6 bg-gradient-to-r from-muted/80 to-background/50 rounded-3xl border-t-4 shadow-2xl border-l-8 backdrop-blur-xl",
+                        risk.border
+                      )}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <Clock className={cn("w-6 h-6", risk.color)} />
+                        <h4 className={cn("font-black text-lg", risk.color)}>ประเมินครั้งต่อไป</h4>
+                      </div>
+                      <p className="text-2xl font-display font-bold text-foreground mb-1 leading-tight">
+                        {nextAssessmentData.formatted}
+                      </p>
+                      <p className={cn("font-bold text-sm uppercase tracking-wider", risk.color)}>
+                        ({nextAssessmentData.text})
+                      </p>
+                    </motion.div>
                   )}
                 </motion.div>
               )}
