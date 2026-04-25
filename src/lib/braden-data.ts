@@ -114,10 +114,12 @@ export const getScoreColor = (value: number) => {
   }
 };
 export const calculateRiskLevel = (score: number, age?: number) => {
+  // Use Number.isNaN to ensure strict validity
+  const validAge = age !== undefined && !Number.isNaN(age);
   // Age-based exclusion for children ≤5 years
-  if (age !== undefined && age <= 5) {
+  if (validAge && age <= 5) {
     return {
-      label: "ไม่ประเมิน (อายุ ≤5)",
+      label: "ไม่ประเมิน (อายุ ≤5 ปี)",
       color: "text-slate-500 dark:text-slate-400",
       bg: "bg-slate-100 dark:bg-slate-900",
       border: "border-slate-300 dark:border-slate-800",
@@ -130,13 +132,13 @@ export const calculateRiskLevel = (score: number, age?: number) => {
       nextIntervalText: "ตามดุลยพินิจ",
       care: [
         "ตรวจสอบสภาพผิวหนังตามมาตรฐานกุมารเวชกรรม",
-        "ส่งเสริมการเคลื่อนไหวตามวัย",
-        "ดูแลโภชนาการให้เหมาะสมกับช่วงอายุ",
-        "ใช้อุปกรณ์ป้องกันแรงกดทับที่ออกแบบสำหรับเด็กโดยเฉพาะ"
+        "ส่งเสริมการเคลื่อนไหวตามช่วงอายุ (Age-appropriate mobility)",
+        "ดูแลโภชนาการให้เพียงพอสำหรับเด็ก",
+        "ใช้อุปกรณ์ป้องกันแรงกดทับที่ออกแบบสำหรับกุมารเวชกรรม"
       ]
     };
   }
-  // Clinical Logic Update (New Thresholds)
+  // Clinical Logic (Standard Braden Thresholds)
   if (score <= 9) return {
     label: "เสี่ยงสูงที่สุด (Severe Risk)",
     color: "text-red-700 dark:text-red-400",
@@ -145,16 +147,16 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     glow: "drop-shadow-[0_0_30px_rgba(220,38,38,0.7)]",
     ariaLabel: "ระดับความเสี่ยงสูงที่สุด",
     action: "ต้องการการดูแลอย่างเร่งด่วนและแผนการลดแรงกดทับอย่างเข้มข้นทันที",
-    dx: "เสี่ยงต่อการเกิดแผลกดทับอย่างรุนแรง",
-    assess_frequency: "ทุกวันทุกเวร",
+    dx: "เสี่ยงต่อการเกิดแผลกดทับอย่างรุนแรง (Severe risk for pressure ulcer)",
+    assess_frequency: "ทุกเวร (Every shift)",
     nextIntervalHours: 1,
     nextIntervalText: "ทุก 1 ชั่วโมง",
     care: [
-      "พลิกตัวทุก 1 ชม. (ตามความเหมาะสมทางคลินิก)",
-      "ใช้ที่นอนคุณภาพสูง (High-end Low Air Loss)",
-      "เฝ้าระวังผิวหนังใกล้ชิด ตรวจสอบจุดกดทับทุก 1 ชม.",
-      "ใช้ foam dressing ในตำแหน่งที่มีความเสี่ยงสูง",
-      "ดูแลโภชนาการเข้มข้น (High protein, High calorie)"
+      "พลิกตัวทุก 1 ชม. และตรวจสอบจุดกดทับอย่างละเอียด",
+      "ใช้ที่นอนลดแรงกดทับประสิทธิภาพสูง (High-end Low Air Loss)",
+      "ใช้แผ่นโฟมปิดแผล (Foam dressing) ในตำแหน่งเสี่ยงสูง",
+      "ดูแลความสะอาดผิวหนังทันทีหลังมีการขับถ่าย",
+      "Consult นักโภชนาการเพื่อปรับแผนอาหาร High protein/calorie"
     ]
   };
   if (score <= 12) return {
@@ -165,19 +167,19 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     glow: "drop-shadow-[0_0_30px_rgba(234,88,12,0.6)]",
     ariaLabel: "ระดับความเสี่ยงสูง",
     action: "กำหนดตารางพลิกตัวที่เข้มงวดและใช้อุปกรณ์รองรับเพื่อลดแรงกดทับ",
-    dx: "เสี่ยงสูงต่อการเกิดแผลกดทับจากการเคลื่อนไหวไม่ได้",
-    assess_frequency: "ทุกวันทุกเวร",
+    dx: "เสี่ยงสูงต่อการเกิดแผลกดทับ (High risk for pressure ulcer)",
+    assess_frequency: "ทุกเวร (Every shift)",
     nextIntervalHours: 2,
     nextIntervalText: "ทุก 2 ชั่วโมง",
     care: [
       "พลิกตัวทุก 1–2 ชม. ตามตารางที่กำหนด",
       "ใช้ที่นอนลมแบบ Alternating pressure mattress",
-      "หลีกเลี่ยงแรงเสียดทานขณะเคลื่อนย้าย",
-      "ดูแลความชื้นของผิวหนัง (Incontinence care)",
-      "Consult นักโภชนาการเพื่อปรับแผนอาหาร"
+      "หลีกเลี่ยงแรงเสียดทานและแรงเฉือนขณะเคลื่อนย้าย",
+      "ดูแล Skin Barrier เพื่อป้องกันความชื้น",
+      "Consult ทีมโภชนาการประเมินภาวะโภชนาการ"
     ]
   };
-  if (score <= 15) return {
+  if (score <= 14) return {
     label: "เสี่ยงปานกลาง (Moderate Risk)",
     color: "text-amber-700 dark:text-amber-400",
     bg: "bg-amber-100/95 dark:bg-amber-950/80",
@@ -185,16 +187,16 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     glow: "drop-shadow-[0_0_30px_rgba(217,119,6,0.5)]",
     ariaLabel: "ระดับความเสี่ยงปานกลาง",
     action: "เพิ่มการเฝ้าระวังและพิจารณาใช้อุปกรณ์เสริมเพื่อช่วยลดแรงกดทับ",
-    dx: "เสี่ยงต่อการเกิดแผลกดทับจากภาวะโภชนาการและ immobility",
-    assess_frequency: "ทุกวันทุกเวร",
+    dx: "เสี่ยงต่อการเกิดแผลกดทับ (Moderate risk for pressure ulcer)",
+    assess_frequency: "ทุกวัน (Daily)",
     nextIntervalHours: 2,
     nextIntervalText: "ทุก 2 ชั่วโมง",
     care: [
       "พลิกตัวทุก 2 ชม. อย่างเคร่งครัด",
-      "ใช้ที่นอนลมมาตรฐานเพื่อลดแรงกดทับ",
+      "ใช้ที่นอนลดแรงกดทับมาตรฐาน",
       "ประเมินสภาพผิวหนังทุกเวร (อย่างน้อยทุก 8 ชม.)",
       "ใช้อุปกรณ์รองปุ่มกระดูก เช่น หมอน หรือเจล",
-      "เพิ่มปริมาณโปรตีนในมื้ออาหาร"
+      "เสริมโปรตีนและสารอาหารให้เพียงพอ"
     ]
   };
   if (score <= 18) return {
@@ -205,15 +207,15 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     glow: "drop-shadow-[0_0_30px_rgba(202,138,4,0.4)]",
     ariaLabel: "ระดับความเสี่ยงต่ำ",
     action: "รักษาสุขอนามัยของผิวหนังและประเมินซ้ำตามระยะ",
-    dx: "เสี่ยงต่อการเกิดแผลกดทับจากการเคลื่อนไหวร่างกายลดลง",
-    assess_frequency: "ทุกวันทุกเวร",
+    dx: "เสี่ยงต่ำต่อการเกิดแผลกดทับ (Mild risk for pressure ulcer)",
+    assess_frequency: "ทุกวัน (Daily)",
     nextIntervalHours: 4,
     nextIntervalText: "ทุก 4 ชั่วโมง",
     care: [
       "พลิกตัวทุก 2–3 ชม. และส่งเสริมการเคลื่อนไหว",
-      "ใช้ที่นอนลดแรงกดทับมาตรฐาน",
-      "ดูแลผิวหนังให้แห้งและสะอาด (Skin hygiene)",
-      "ประเมินภาวะโภชนาการและเสริมสารอาหาร"
+      "ดูแลผิวหนังให้สะอาดและแห้งอยู่เสมอ",
+      "ประเมินภาวะโภชนาการเบื้องต้น",
+      "ให้ความรู้ผู้ป่วยและญาติเรื่องการป้องกันแผลกดทับ"
     ]
   };
   return {
@@ -224,15 +226,15 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     glow: "drop-shadow-[0_0_30px_rgba(5,150,105,0.4)]",
     ariaLabel: "ไม่มีความเสี่ยงที่ชัดเจน",
     action: "ดูแลตามมาตรฐานการพยาบาลทั่วไป",
-    dx: "ระดับความเสี่ยงปกติ (ติดตามประเมินตามรอบ)",
-    assess_frequency: "สัปดาห์ละครั้ง",
+    dx: "ระดับความเสี่ยงปกติ (No current risk for pressure ulcer)",
+    assess_frequency: "สัปดาห์ละครั้ง (Weekly)",
     nextIntervalHours: 24,
-    nextIntervalText: "รายวัน",
+    nextIntervalText: "รายวัน (Daily)",
     care: [
-      "ประเมินสภาพผิวหนังทุกวัน (Daily assessment)",
+      "ประเมินสภาพผิวหนังเป็นประจำทุกวัน (Daily assessment)",
       "ส่งเสริมการเคลื่อนไหวร่างกายตามปกติ",
       "ดูแลความสะอาดผิวหนังตามมาตรฐาน",
-      "ให้ความรู้เรื่องการป้องกันแผลกดทับเบื้องต้น"
+      "ติดตามประเมินซ้ำเมื่อสภาพร่างกายเปลี่ยนแปลง"
     ]
   };
 };
