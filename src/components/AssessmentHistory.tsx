@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '@convex/_generated/api';
+import { api } from '../../convex/_generated/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Trash2, Search, Calendar, ChevronRight, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 export function AssessmentHistory() {
   const history = useQuery(api.assessments.listAssessments);
   const deleteMutation = useMutation(api.assessments.deleteAssessment);
   const [searchTerm, setSearchTerm] = useState('');
-  const filteredHistory = (history ?? []).filter(item => 
+  const filteredHistory = (history ?? []).filter(item =>
     item.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.patientHN.includes(searchTerm)
   );
@@ -28,8 +28,8 @@ export function AssessmentHistory() {
     <div className="flex flex-col h-full gap-4">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input 
-          placeholder="ค้นหาชื่อหรือ HN..." 
+        <Input
+          placeholder="ค้นหาชื่อหรือ HN..."
           className="pl-10"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

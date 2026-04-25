@@ -2,14 +2,13 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { calculateRiskLevel } from '@/lib/braden-data';
 import { cn } from '@/lib/utils';
-import { AlertCircle, RotateCcw, User, Clipboard, CheckCircle2, ScrollText, Clock, Baby, ChevronUp, ChevronDown, CloudUpload, Loader2 } from 'lucide-react';
+import { CheckCircle2, RotateCcw, Clipboard, CloudUpload, Loader2, ChevronUp, ChevronDown } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { PatientInfo } from '@/hooks/use-patient-info';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMutation } from 'convex/react';
-import { api } from '@convex/_generated/api';
-import { useConvexAuth } from 'convex/react';
+import { useMutation, useConvexAuth } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 import { toast } from 'sonner';
 interface ScoreDisplayProps {
   scores: Record<string, number | null>;
@@ -65,26 +64,6 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
       setIsSaving(false);
     }
   };
-  const nextAssessmentDisplay = useMemo(() => {
-    if (!isComplete) return null;
-    const baseDateStr = patientInfo.date && patientInfo.time
-      ? `${patientInfo.date}T${patientInfo.time}`
-      : new Date().toISOString();
-    try {
-      const baseDate = new Date(baseDateStr);
-      if (isNaN(baseDate.getTime())) return "โปรดระบุวันที่ที่ถูกต้อง";
-      const nextDate = new Date(baseDate.getTime() + (risk.nextIntervalHours * 3600000));
-      return new Intl.DateTimeFormat('th-TH', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit'
-      }).format(nextDate);
-    } catch (e) {
-      return "ไม่สามารถคำนวณเวลาได้";
-    }
-  }, [isComplete, patientInfo.date, patientInfo.time, risk.nextIntervalHours]);
   const isChild = patientInfo.age && parseInt(patientInfo.age) <= 5;
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 lg:relative lg:bottom-auto lg:z-0 lg:block p-0 sm:p-4 lg:p-0 pb-safe sm:pb-4 lg:pb-0" aria-live="polite">
@@ -162,8 +141,8 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                 disabled={!isComplete || isSaving}
                 className={cn(
                   "flex-1 btn rounded-lg text-[10px] font-black py-3 flex gap-2 items-center justify-center border-2 transition-all",
-                  isComplete 
-                    ? "bg-slate-900 text-white border-slate-800 shadow-md hover:bg-slate-800" 
+                  isComplete
+                    ? "bg-slate-900 text-white border-slate-800 shadow-md hover:bg-slate-800"
                     : "bg-muted text-muted-foreground cursor-not-allowed"
                 )}
               >

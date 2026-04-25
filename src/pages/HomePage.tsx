@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { BRADEN_CATEGORIES, calculateRiskLevel } from '@/lib/braden-data';
 import { SelectableCard } from '@/components/SelectableCard';
 import { ScoreDisplay } from '@/components/ScoreDisplay';
@@ -8,18 +8,17 @@ import { toast } from 'sonner';
 import { LogicPreview } from '@/components/LogicPreview';
 import { PatientInfoForm } from '@/components/PatientInfoForm';
 import { usePatientInfo } from '@/hooks/use-patient-info';
-import { ShieldCheck, ChevronUp, ChevronDown, Activity, History, LogIn, LogOut, User } from 'lucide-react';
+import { ShieldCheck, Activity, History, LogIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { useConvexAuth, Authenticated, Unauthenticated } from 'convex/react';
+import { Authenticated, Unauthenticated } from 'convex/react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { SignInForm } from '@/components/SignInForm';
 import { SignOutButton } from '@/components/SignOutButton';
 import { AssessmentHistory } from '@/components/AssessmentHistory';
 export function HomePage() {
-  const { patientInfo, updateField, resetPatientInfo, isPatientValid, isAgeValid } = usePatientInfo();
+  const { patientInfo, updateField, resetPatientInfo, isPatientValid } = usePatientInfo();
   const [showLogic, setShowLogic] = useState(false);
-  const { isAuthenticated } = useConvexAuth();
   const [scores, setScores] = useState<Record<string, number | null>>({
     sensory: null, moisture: null, activity: null, mobility: null, nutrition: null, friction: null,
   });
@@ -37,11 +36,11 @@ export function HomePage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const handleCopySummary = useCallback(() => {
-    if (!isComplete) return;
-    const summaryText = `[BRADEN ASSESSMENT]\nDate: ${patientInfo.date}\nPatient: ${patientInfo.name}\nScore: ${totalScore}/23\nRisk: ${currentRisk?.label}\nDX: ${currentRisk?.dx}`;
+    if (!isComplete || !currentRisk) return;
+    const summaryText = `[BRADEN ASSESSMENT]\nDate: ${patientInfo.date}\nPatient: ${patientInfo.name}\nScore: ${totalScore}/23\nRisk: ${currentRisk.label}\nDX: ${currentRisk.dx}`;
     navigator.clipboard.writeText(summaryText);
     toast.success("คัดลอกสรุปเรียบร้อยแล้ว");
-  }, [scores, isComplete, patientInfo, totalScore, currentRisk]);
+  }, [isComplete, patientInfo, totalScore, currentRisk]);
   return (
     <div className={cn(
       "min-h-screen transition-all duration-1000 ease-out pb-64 lg:pb-24",
