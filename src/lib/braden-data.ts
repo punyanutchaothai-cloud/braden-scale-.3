@@ -116,52 +116,85 @@ export const getScoreColor = (value: number) => {
 export const calculateRiskLevel = (score: number) => {
   if (score <= 9) return {
     label: "เสี่ยงสูงมาก (Severe Risk)",
-    color: "text-red-600 dark:text-red-400",
-    bg: "bg-red-100/98 dark:bg-red-950/60",
-    border: "border-red-300 dark:border-red-900",
+    color: "text-red-700 dark:text-red-400",
+    bg: "bg-red-100/95 dark:bg-red-950/80",
+    border: "border-red-400 dark:border-red-900",
     glow: "drop-shadow-[0_0_30px_rgba(220,38,38,0.7)]",
     ariaLabel: "ระดับความเสี่ยงสูงมาก คะแนน 9 หรือน้อยกว่า จำเป็นต้องได้รับการดูแลอย่างเร่งด่วน",
     action: "ต้องการการดูแลอย่างเร่งด่วนและแผนการลดแรงกดทับอย่างเข้มข้นทันที",
-    diagnosis: "วินิจฉัย: แผลกดทับเสี่ยงสูงมาก - ต้องป้องกันทันทีด้วยที่นอนพิเศษ แทรกเปลี่ยนท่า q2h, ตรวจผิวทุก 1h"
+    dx: "เสี่ยงต่อการเกิดแผลกดทับอย่างรุนแรง",
+    care: [
+      "พลิกตัวทุก 1 ชม.",
+      "ใช้ที่นอน ICU (Air-fluidized หรือ High-end Low Air Loss)",
+      "เฝ้าระวังผิวหนังใกล้ชิด ตรวจสอบจุดกดทับทุก 1 ชม.",
+      "ใช้ foam dressing ในตำแหน่งที่มีความเสี่ยงสูง",
+      "ดูแลโภชนาการเข้มข้น (High protein, High calorie)"
+    ]
   };
   if (score <= 12) return {
     label: "เสี่ยงสูง (High Risk)",
-    color: "text-orange-600 dark:text-orange-400",
-    bg: "bg-orange-100/98 dark:bg-orange-950/60",
-    border: "border-orange-300 dark:border-orange-900",
+    color: "text-orange-700 dark:text-orange-400",
+    bg: "bg-orange-100/95 dark:bg-orange-950/80",
+    border: "border-orange-400 dark:border-orange-900",
     glow: "drop-shadow-[0_0_30px_rgba(234,88,12,0.6)]",
     ariaLabel: "ระดับความเสี่ยงสูง คะแนน 10 ถึง 12 ต้องกำหนดตารางพลิกตัวที่เข้มงวด",
     action: "กำหนดตารางพลิกตัวที่เข้มงวดและใช้อุปกรณ์รองรับเพื่อลดแรงกดทับ",
-    diagnosis: "วินิจฉัย: เสี่ยงสูง - ที่นอนพิเศษ, เปลี่ยนท่า q2-3h, ครีมบำรุงผิว"
+    dx: "เสี่ยงสูงต่อการเกิดแผลกดทับจากการเคลื่อนไหวไม่ได้",
+    care: [
+      "พลิกตัวทุก 1–2 ชม. ตามตารางที่กำหนด",
+      "ใช้ที่นอนลมแบบ Alternating pressure mattress",
+      "หลีกเลี่ยงแรงเสียดทานและแรงเฉือนขณะเคลื่อนย้าย",
+      "ดูแลความชื้นของผิวหนังอย่างสม่ำเสมอ",
+      "Consult นักโภชนาการเพื่อปรับแผนอาหาร"
+    ]
   };
   if (score <= 14) return {
     label: "เสี่ยงปานกลาง (Moderate Risk)",
-    color: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-50/98 dark:bg-amber-950/60",
-    border: "border-amber-300 dark:border-amber-900",
+    color: "text-amber-700 dark:text-amber-400",
+    bg: "bg-amber-100/95 dark:bg-amber-950/80",
+    border: "border-amber-400 dark:border-amber-900",
     glow: "drop-shadow-[0_0_30px_rgba(217,119,6,0.5)]",
     ariaLabel: "ระดับความเสี่ยงปานกลาง คะแนน 13 ถึง 14 เพิ่มการเฝ้าระวังและใช้อุปกรณ์เสริม",
     action: "เพิ่มการเฝ้าระวังและพิจารณาใช้อุปกรณ์เสริมเพื่อช่วยลดแรงกดทับ",
-    diagnosis: "วินิจฉัย: เสี่ยงปานกลาง - เปลี่ยนท่า q3-4h, ตรวจผิว q4h, สอนผู้ป่วย"
+    dx: "เสี่ยงต่อการเกิดแผลกดทับจาก immobility และโภชนาการไม่พอ",
+    care: [
+      "พลิกตัวทุก 2 ชม. อย่างเคร่งครัด",
+      "ใช้ที่นอนลมเพื่อลดแรงกดทับ",
+      "ประเมินสภาพผิวหนังทุกเวร (8-12 ชม.)",
+      "ใช้อุปกรณ์รองปุ่มกระดูก เช่น หมอน หรือเจลรอง",
+      "เพิ่มปริมาณโปรตีนในมื้ออาหาร"
+    ]
   };
   if (score <= 18) return {
-    label: "เสี่ยงต่ำ (Mild Risk)",
-    color: "text-yellow-600 dark:text-yellow-400",
-    bg: "bg-yellow-50/98 dark:bg-yellow-950/60",
-    border: "border-yellow-300 dark:border-yellow-900",
+    label: "เสี่ยงเล็กน้อย (Mild Risk)",
+    color: "text-yellow-700 dark:text-yellow-400",
+    bg: "bg-yellow-100/95 dark:bg-yellow-950/80",
+    border: "border-yellow-400 dark:border-yellow-900",
     glow: "drop-shadow-[0_0_30px_rgba(202,138,4,0.4)]",
     ariaLabel: "ระดับความเสี่ยงต่ำ คะแนน 15 ถึง 18 รักษาสุขอนามัยของผิวหนังและประเมินซ้ำตามระยะ",
     action: "รักษาสุขอนามัยของผิวหนังและประเมินซ้ำตามรอบระยะเวลาที่กำหนด",
-    diagnosis: "วินิจฉัย: เสี่ยงต่ำ - ดูแลปกติ + ตรวจซ้ำ"
+    dx: "เสี่ยงต่อการเกิดแผลกดทับจากการเคลื่อนไหวลดลง",
+    care: [
+      "พลิกตัวทุก 2–3 ชม. และส่งเสริมการเคลื่อนไหว",
+      "ใช้ที่นอนลดแรงกดทับมาตรฐาน",
+      "ดูแลผิวหนังให้แห้งและสะอาดอยู่เสมอ",
+      "ประเมินและเพิ่มโภชนาการตามความเหมาะสม"
+    ]
   };
   return {
     label: "ไม่มีความเสี่ยง (No Risk)",
-    color: "text-emerald-600 dark:text-emerald-400",
-    bg: "bg-emerald-50/98 dark:bg-emerald-950/60",
-    border: "border-emerald-300 dark:border-emerald-900",
+    color: "text-emerald-700 dark:text-emerald-400",
+    bg: "bg-emerald-100/95 dark:bg-emerald-950/80",
+    border: "border-emerald-400 dark:border-emerald-900",
     glow: "drop-shadow-[0_0_30px_rgba(5,150,105,0.4)]",
     ariaLabel: "ไม่มีความเสี่ยงที่ชัดเจน คะแนน 19 ถึง 23 ดูแลตามมาตรฐานและประเมินซ้ำเมื่ออาการเปลี่ยน",
     action: "ดูแลตามมาตรฐานและประเมินซ้ำหากสภาวะทางคลินิกของผู้ป่วยเปลี่ยนแปลงอย่างมีนัยสำคัญ",
-    diagnosis: "วินิจฉัย: ไม่เสี่ยง - ดูแลมาตรฐาน"
+    dx: "เสี่ยงต่อการเกิดแผลกดทับเล็กน้อย",
+    care: [
+      "ประเมินสภาพผิวหนังทุกวัน",
+      "ส่งเสริมการเคลื่อนไหวร่างกายตามปกติ",
+      "ดูแลความสะอาดผิวหนังตามมาตรฐานการพยาบาล",
+      "ให้ความรู้เรื่องการป้องกันแผลกดทับแก่ผู้ป่วยและญาติ"
+    ]
   };
 };

@@ -26,14 +26,14 @@ export function HomePage() {
   const totalScore = Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0);
   const currentRisk = isComplete ? calculateRiskLevel(totalScore) : null;
   useEffect(() => {
-    if (isComplete && !isPatientValid) {
-      toast.warning("ข้อมูลผู้ป่วยไม่ครบถ้วน", {
-        description: "กรุณาระบุชื่อและเลข HN เพื่อการบันทึกข้อมูลที่สมบูรณ์",
-        id: "validation-warning",
-      });
-    }
     if (isComplete) {
-      toast.success("การประเมินเสร็จสิ้น", {
+      if (!isPatientValid) {
+        toast.warning("ข้อมูลผู้ป่วยไม่ครบถ้วน", {
+          description: "กรุณาระบุชื่อและเลข HN เพื่อการบันทึกข้อมูลที่สมบูรณ์",
+          id: "validation-warning",
+        });
+      }
+      toast.success("จัดทำแผนการพยาบาลเสร็จสิ้น", {
         description: `ระดับความเสี่ยง: ${currentRisk?.label}`,
         duration: 5000,
       });
@@ -64,7 +64,7 @@ export function HomePage() {
       return;
     }
     const risk = calculateRiskLevel(totalScore);
-    let summaryText = `[สรุปผลการประเมิน BRADEN SCALE / ASSESSMENT SUMMARY]\n`;
+    let summaryText = `[สรุปผลการประเมิน BRADEN SCORE + แผนการพยาบาล]\n`;
     summaryText += `วันที่ประเมิน: ${patientInfo.date} เวลา ${patientInfo.time}\n`;
     summaryText += `ชื่อผู้ป่วย: ${patientInfo.name || 'N/A'}\n`;
     summaryText += `HN: ${patientInfo.hn || 'N/A'} | เตียง: ${patientInfo.bed || 'N/A'}\n`;
@@ -77,10 +77,18 @@ export function HomePage() {
     summaryText += `--------------------------------------------\n`;
     summaryText += `คะแนนรวม (TOTAL SCORE): ${totalScore}/23\n`;
     summaryText += `ระดับความเสี่ยง (RISK LEVEL): ${risk.label}\n`;
-    summaryText += `คำวินิจฉัย (DIAGNOSIS): ${risk.diagnosis}\n`;
-    summaryText += `ข้อแนะนำ (ACTION): ${risk.action}\n`;
+    summaryText += `ข้อวินิจฉัยทางการพยาบาล (DIAGNOSIS): ${risk.dx}\n\n`;
+    summaryText += `แผนการพยาบาล (NURSING INTERVENTIONS):\n`;
+    risk.care.forEach((item, idx) => {
+      summaryText += `${idx + 1}. ${item}\n`;
+    });
+    summaryText += `--------------------------------------------\n`;
+    summaryText += `คำแนะนำเพิ่มเติม: ${risk.action}\n`;
+    summaryText += `© Braden Scale Pro - ระบบสนับสนุนการตัดสินใจทางคลินิก`;
     navigator.clipboard.writeText(summaryText).then(() => {
-      toast.success("คัดลอกสรุปผลลงคลิปบอร์ดแล้ว");
+      toast.success("คัดลอกแผนการพยาบาลลงคลิปบอร์ดแล้ว", {
+        description: "พร้อมสำหรับการบันทึกในระบบเวชระเบียนอิเล็กทรอนิกส์ (EHR)"
+      });
     }).catch(() => {
       toast.error("เกิดข้อผิดพลาดในการคัดลอก");
     });
@@ -134,13 +142,13 @@ export function HomePage() {
                   {isComplete && <Activity className={cn("w-5 h-5 animate-bounce", currentRisk?.color)} />}
                 </h1>
                 <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.3em]">
-                  ระบบสนับสนุนการตัดสินใจทางการพยาบาล
+                  Nursing Decision Support System
                 </p>
               </div>
             </div>
             <div className="hidden lg:flex items-center gap-3 text-xs text-muted-foreground font-black bg-muted/50 px-5 py-2.5 rounded-full border border-border/50">
               <Info className="w-4 h-4 text-primary" />
-              <span>เครื่องมือประเมินมาตรฐานทางคลินิก (Validated Instrument)</span>
+              <span>เครื่องมือประเมินและวางแผนการพยาบาลมาตรฐาน</span>
             </div>
           </div>
         </div>
@@ -206,7 +214,7 @@ export function HomePage() {
           </p>
           <p className="text-muted-foreground/60 text-[10px] leading-relaxed max-w-2xl mx-auto font-medium">
             ซอฟต์แวร์นี้ออกแบบมาเพื่อใช้งานโดยบุคลากรทางการแพทย์ที่ผ่านการฝึกอบรมเท่านั้น
-            ผลการประเมินควรได้รับการตรวจสอบทางคลินิกและบูรณาการเข้ากับแผนการพยาบาลที่ครอบคลุมของผู้ป่วย
+            แผนการพยาบาลที่แนะนำควรได้รับการตรวจสอบและปรับใช้ตามวิจารณญาณทางวิชาชีพและบริบทของผู้ป่วยเฉพาะราย
             © {new Date().getFullYear()} Braden Scale Pro.
           </p>
         </div>
