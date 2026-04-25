@@ -9,6 +9,10 @@ export interface BradenCategory {
   description: string;
   options: BradenOption[];
 }
+/**
+ * Standard Braden Scale Categories (Thai Translation)
+ * Optimized for Clinical Assessment Workflows
+ */
 export const BRADEN_CATEGORIES: BradenCategory[] = [
   {
     id: "sensory",
@@ -113,10 +117,16 @@ export const getScoreColor = (value: number) => {
       };
   }
 };
-export const calculateRiskLevel = (score: number, age?: number) => {
-  const validAge = age !== undefined && !Number.isNaN(age);
-  // Pediatric exclusion (age <= 5)
-  if (validAge && age <= 5) {
+/**
+ * Braden Scale Risk Algorithm v2.3 (Adult Standard adapted for Thailand)
+ * Thresholds based on WOCN guidelines.
+ * Pediatric exclusion for age <= 5 as per institutional policy.
+ */
+export const calculateRiskLevel = (score: number, age?: number | string) => {
+  const numericAge = typeof age === 'number' ? age : parseInt(age || '');
+  const isValidAge = !isNaN(numericAge);
+  // Pediatric exclusion (age <= 5) - Requires different scale (Braden Q)
+  if (isValidAge && numericAge <= 5) {
     return {
       label: "ไม่ประเมิน (อายุ ≤5 ปี)",
       color: "text-slate-500 dark:text-slate-400",
@@ -125,19 +135,19 @@ export const calculateRiskLevel = (score: number, age?: number) => {
       glow: "",
       ariaLabel: "ไม่ประเมิน Braden Scale ในผู้ป่วยอายุน้อยกว่าหรือเท่ากับ 5 ปี",
       action: "โปรดใช้เครื่องมือประเมินสำหรับเด็ก (เช่น Braden Q) หรือดูแลตามมาตรฐานกุมารเวชกรรม",
-      dx: "ไม่ระบุ (กลุ่มอายุนอกเกณฑ์การประเมิน Braden Scale)",
-      assess_frequency: "ไม่ระบุ",
+      dx: "กลุ่มอายุนอกเกณฑ์การประเมิน Braden Scale",
+      assess_frequency: "ตามดุลยพินิจ",
       nextIntervalHours: 24,
       nextIntervalText: "ตามดุลยพินิจ",
       care: [
         "ตรวจสอบสภาพผิวหนังตามมาตรฐานกุมารเวชกรรม",
-        "ส่งเสริมการเคลื่อนไหวตามช่วงอายุ (Age-appropriate mobility)",
+        "ส่งเสริมการเคลื่อนไหวตามช่วงอายุ",
         "ดูแลโภชนาการให้เพียงพอสำหรับเด็ก",
-        "ใช้อุปกรณ์ป้องกันแรงกดทับที่ออกแบบสำหรับกุมารเวชกรรม"
+        "ใช้อุปกรณ์ป้องกันแรงกดทับกุมารเวชกรรม"
       ]
     };
   }
-  // Adult Risk Thresholds (age > 5)
+  // Adult Risk Thresholds
   if (score <= 9) return {
     label: "เสี่ยงสูงที่สุด (Severe Risk)",
     color: "text-red-700 dark:text-red-400",
@@ -149,13 +159,13 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     dx: "เสี่ยงต่อการเกิดแผลกดทับอย่างรุนแรง (Severe risk for pressure ulcer)",
     assess_frequency: "ทุกวันทุกเวร",
     nextIntervalHours: 8,
-    nextIntervalText: "ทุกวันทุกเวร",
+    nextIntervalText: "ทุกวันทุกเวร (Shiftly)",
     care: [
       "พลิกตัวทุก 1 ชม. และตรวจสอบจุดกดทับอย่างละเอียด",
-      "ใช้ที่นอนลดแรงกดทับประสิทธิภาพสูง (High-end Low Air Loss)",
+      "ใช้ที่นอนลดแรงกดทับประสิทธิภาพสูง (Low Air Loss)",
       "ใช้แผ่นโฟมปิดแผล (Foam dressing) ในตำแหน่งเสี่ยงสูง",
       "ดูแลความสะอาดผิวหนังทันทีหลังมีการขับถ่าย",
-      "Consult นักโภชนาการเพื่อปรับแผนอาหาร High protein/calorie"
+      "ปรึกษานักโภชนาการเพื่อปรับแผนอาหาร High protein"
     ]
   };
   if (score <= 12) return {
@@ -169,13 +179,13 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     dx: "เสี่ยงสูงต่อการเกิดแผลกดทับ (High risk for pressure ulcer)",
     assess_frequency: "ทุกวันทุกเวร",
     nextIntervalHours: 8,
-    nextIntervalText: "ทุกวันทุกเวร",
+    nextIntervalText: "ทุกวันทุกเวร (Shiftly)",
     care: [
       "พลิกตัวทุก 1–2 ชม. ตามตารางที่กำหนด",
       "ใช้ที่นอนลมแบบ Alternating pressure mattress",
-      "หลีกเลี่ยงแรงเสียดทานและแรงเฉือนขณะเคลื่อนย้าย",
+      "หลีกเลี่ยงแรงเสียดทานขณะเคลื่อนย้าย (Lift don't drag)",
       "ดูแล Skin Barrier เพื่อป้องกันความชื้น",
-      "Consult ทีมโภชนาการประเมินภาวะโภชนาการ"
+      "ประเมินภาวะโภชนาการโดยละเอียด"
     ]
   };
   if (score <= 15) return {
@@ -189,13 +199,13 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     dx: "เสี่ยงต่อการเกิดแผลกดทับ (Moderate risk for pressure ulcer)",
     assess_frequency: "ทุกวันทุกเวร",
     nextIntervalHours: 8,
-    nextIntervalText: "ทุกวันทุกเวร",
+    nextIntervalText: "ทุกวันทุกเวร (Shiftly)",
     care: [
       "พลิกตัวทุก 2 ชม. อย่างเคร่งครัด",
       "ใช้ที่นอนลดแรงกดทับมาตรฐาน",
-      "ประเมินสภาพผิวหนังทุกเวร (อย่างน้อยทุก 8 ชม.)",
+      "ประเมินสภาพผิวหนังอย่างน้อยทุก 8 ชม.",
       "ใช้อุปกรณ์รองปุ่มกระดูก เช่น หมอน หรือเจล",
-      "เสริมโปรตีนและสารอาหารให้เพียงพอ"
+      "เสริมสารอาหารและโปรตีนให้เพียงพอ"
     ]
   };
   if (score <= 18) return {
@@ -209,12 +219,12 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     dx: "เสี่ยงต่ำต่อการเกิดแผลกดทับ (Mild risk for pressure ulcer)",
     assess_frequency: "ทุกวันทุกเวร",
     nextIntervalHours: 8,
-    nextIntervalText: "ทุกวันทุกเวร",
+    nextIntervalText: "ทุกวันทุกเวร (Shiftly)",
     care: [
       "พลิกตัวทุก 2–3 ชม. และส่งเสริมการเคลื่อนไหว",
       "ดูแลผิวหนังให้สะอาดและแห้งอยู่เสมอ",
       "ประเมินภาวะโภชนาการเบื้องต้น",
-      "ให้ความรู้ผู้ป่วยและญาติเรื่องการป้องกันแผลกดทับ"
+      "ให้ความรู้ผู้ป่วยและญาติเรื่องการป้องกัน"
     ]
   };
   // No Risk Score >= 19
@@ -226,12 +236,12 @@ export const calculateRiskLevel = (score: number, age?: number) => {
     glow: "drop-shadow-[0_0_30px_rgba(5,150,105,0.4)]",
     ariaLabel: "ไม่มีความเสี่ยงที่ชัดเจน",
     action: "ดูแลตามมาตรฐานการพยาบาลทั่วไป",
-    dx: "ระดับความเสี่ยงปกติ (No current risk for pressure ulcer)",
+    dx: "ระดับความเสี่ยงปกติ (No current risk)",
     assess_frequency: "สัปดาห์ละครั้ง",
     nextIntervalHours: 168,
     nextIntervalText: "สัปดาห์ละครั้ง",
     care: [
-      "ประเมินสภาพผิวหนังเป็นประจำทุกวัน (Daily assessment)",
+      "ประเมินสภาพผิวหนังเป็นประจำทุกวัน",
       "ส่งเสริมการเคลื่อนไหวร่างกายตามปกติ",
       "ดูแลความสะอาดผิวหนังตามมาตรฐาน",
       "ติดตามประเมินซ้ำเมื่อสภาพร่างกายเปลี่ยนแปลง"

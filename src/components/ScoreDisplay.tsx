@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { calculateRiskLevel } from '@/lib/braden-data';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, RotateCcw, Clipboard, CloudUpload, Loader2, ChevronUp, ChevronDown, Clock, CalendarDays } from 'lucide-react';
+import { CheckCircle2, RotateCcw, Clipboard, CloudUpload, Loader2, ChevronUp, ChevronDown, Clock } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { PatientInfo } from '@/hooks/use-patient-info';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -31,12 +31,15 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
   const answeredCount = useMemo(() => Object.values(scores).filter((v) => v !== null).length, [scores]);
   const isComplete = answeredCount === 6;
   const totalScore = useMemo(() => Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0), [scores]);
-  const risk = useMemo(() =>
-    calculateRiskLevel(totalScore, patientInfo.age ? parseInt(patientInfo.age) : undefined),
-  [totalScore, patientInfo.age]);
+  const parsedAge = useMemo(() => {
+    const ageVal = parseInt(patientInfo.age);
+    return isNaN(ageVal) ? undefined : ageVal;
+  }, [patientInfo.age]);
+  const risk = useMemo(() => calculateRiskLevel(totalScore, parsedAge), [totalScore, parsedAge]);
   const completionPercentage = (answeredCount / 6) * 100;
+  const isChild = parsedAge !== undefined && parsedAge <= 5;
   const nextAssessmentData = useMemo(() => {
-    if (!isComplete || !patientInfo.age || parseInt(patientInfo.age) <= 5) return null;
+    if (!isComplete || isChild) return null;
     let baseDate: Date;
     try {
       if (patientInfo.date && patientInfo.time) {
@@ -49,6 +52,8 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
       baseDate = new Date();
     }
     const nextDate = new Date(baseDate.getTime() + (risk.nextIntervalHours * 3600000));
+    // Safety check for invalid date calculations
+    if (isNaN(nextDate.getTime())) return null;
     const formatter = new Intl.DateTimeFormat('th-TH', {
       day: 'numeric',
       month: 'short',
@@ -61,7 +66,7 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
       text: risk.nextIntervalText,
       frequency: risk.assess_frequency
     };
-  }, [isComplete, patientInfo.date, patientInfo.time, patientInfo.age, risk.nextIntervalHours, risk.nextIntervalText, risk.assess_frequency]);
+  }, [isComplete, patientInfo.date, patientInfo.time, isChild, risk.nextIntervalHours, risk.nextIntervalText, risk.assess_frequency]);
   const handleCloudSave = async () => {
     if (!isAuthenticated) {
       toast.error("กรุณาเข้าสู่ระบบเพื่อบันทึกข้อมูลลงคลาวด์");
@@ -80,7 +85,7 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
       await saveAssessment({
         patientName: patientInfo.name,
         patientHN: patientInfo.hn,
-        patientAge: parseInt(patientInfo.age),
+        patientAge: parsedAge ?? 0,
         assessmentDate: patientInfo.date,
         assessmentTime: patientInfo.time,
         scores: scores as any,
@@ -98,31 +103,37 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
       setIsSaving(false);
     }
   };
-  const isChild = patientInfo.age && parseInt(patientInfo.age) <= 5;
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 lg:relative lg:bottom-auto lg:z-0 lg:block p-0 sm:p-4 lg:p-0 pb-safe sm:pb-4 lg:pb-0" aria-live="polite">
+    <div className="fixed bottom-0 left-0 right-0 z-50 lg:relative lg:bottom-auto lg:z-0 lg:block p-0 sm:p-4 lg:p-0 pb-safe" aria-live="polite">
+      <div className={cn(
+        "absolute inset-0 bg-background/40 backdrop-blur-md lg:hidden transition-opacity duration-300",
+        isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
+      )} onClick={() => setIsExpanded(false)} />
       <Card className={cn(
-        "rounded-none sm:rounded-3xl border-t sm:border-2 shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition-all duration-500 ease-in-out overflow-hidden",
-        isComplete ? cn(risk.bg, risk.border, "scale-[1.01]") : "bg-card/95 border-border"
+        "relative rounded-none sm:rounded-3xl border-t sm:border-2 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition-all duration-500 ease-in-out overflow-hidden",
+        isComplete ? cn(risk.bg, risk.border) : "bg-card/95 border-border"
       )}>
         {isMobile && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full h-10 flex items-center justify-center border-b border-border/10 hover:bg-muted/20 transition-colors"
+            className="w-full h-12 flex items-center justify-center border-b border-border/10 hover:bg-muted/20 transition-colors"
           >
             <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[8px] font-black uppercase text-muted-foreground">
-                {isExpanded ? "ย่อหน้าจอ" : "แตะเพื่อดูรายละเอียด"}
+              <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">
+                {isExpanded ? "ย่อหน้าจอรายละเอียด" : "แตะเพื่อดูรายละเอียดผลลัพธ์"}
               </span>
-              {isExpanded ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronUp className="w-4 h-4 text-muted-foreground" />}
+              {isExpanded ? <ChevronDown className="w-5 h-5 text-muted-foreground animate-bounce" /> : <ChevronUp className="w-5 h-5 text-muted-foreground animate-bounce" />}
             </div>
           </button>
         )}
-        <CardContent className="p-4 md:p-8 backdrop-blur-3xl relative">
-          <div className="flex flex-col gap-4 relative z-10">
+        <CardContent className="p-4 md:p-8 backdrop-blur-3xl">
+          <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className={cn("text-4xl md:text-6xl font-display font-black tracking-tighter transition-all duration-1000", isComplete && !isChild ? cn("text-foreground", risk.glow) : "text-muted-foreground/20")}>
+                <div className={cn(
+                  "text-4xl md:text-6xl font-display font-black tracking-tighter transition-all duration-1000", 
+                  isComplete && !isChild ? cn("text-foreground", risk.glow) : "text-muted-foreground/20"
+                )}>
                   {isComplete && !isChild ? totalScore : "--"}
                 </div>
                 <div className="flex flex-col">
@@ -135,7 +146,7 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                 </div>
               </div>
             </div>
-            <AnimatePresence>
+            <AnimatePresence initial={false}>
               {isExpanded && (
                 <motion.div
                   initial={isMobile ? { height: 0, opacity: 0 } : { opacity: 1 }}
@@ -146,8 +157,8 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">หัวข้อที่ประเมินแล้ว</span>
-                      <span className="text-[9px] font-black text-teal-600">{answeredCount} / 6</span>
+                      <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">ความครบถ้วน</span>
+                      <span className="text-[9px] font-black text-teal-600">{answeredCount} / 6 หัวข้อ</span>
                     </div>
                     <Progress value={completionPercentage} className="h-2 bg-muted rounded-full" />
                   </div>
@@ -158,8 +169,8 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                           <p className="text-[9px] font-black text-muted-foreground uppercase mb-0.5">วินิจฉัยทางการพยาบาล:</p>
                           <p className="text-xs font-black text-foreground leading-tight">{risk.dx}</p>
                         </div>
-                        <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
-                          <p className="text-[9px] font-black text-muted-foreground uppercase">แผนการดูแลเบื้องต้น:</p>
+                        <div className="space-y-2 max-h-40 lg:max-h-32 overflow-y-auto pr-1">
+                          <p className="text-[9px] font-black text-muted-foreground uppercase">แผนการดูแล:</p>
                           <ul className="space-y-1.5">
                             {risk.care.map((item, idx) => (
                               <li key={idx} className="flex items-start gap-2 text-[11px] font-medium text-foreground/90 leading-tight">
@@ -177,23 +188,23 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                       initial={{ opacity: 0, scale: 0.95, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       className={cn(
-                        "mt-4 p-5 bg-gradient-to-r from-muted/80 to-background/50 rounded-2xl border-t-4 shadow-xl border-l-8 backdrop-blur-xl",
+                        "mt-2 p-4 bg-gradient-to-r from-muted/80 to-background/50 rounded-2xl border-t-4 shadow-lg border-l-8 backdrop-blur-xl",
                         risk.border
                       )}
                     >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <Clock className={cn("w-5 h-5", risk.color)} />
-                          <h4 className={cn("font-black text-sm", risk.color)}>นัดประเมินครั้งต่อไป</h4>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Clock className={cn("w-4 h-4", risk.color)} />
+                          <h4 className={cn("font-black text-xs", risk.color)}>ประเมินครั้งถัดไป</h4>
                         </div>
-                        <span className={cn("px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/60 shadow-sm border", risk.color, risk.border)}>
-                          📅 {nextAssessmentData.frequency}
+                        <span className={cn("px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-white/60 shadow-sm border", risk.color, risk.border)}>
+                          {nextAssessmentData.frequency}
                         </span>
                       </div>
-                      <p className="text-xl font-display font-bold text-foreground mb-1 leading-tight">
+                      <p className="text-lg font-display font-bold text-foreground mb-0.5 leading-tight">
                         {nextAssessmentData.formatted}
                       </p>
-                      <p className={cn("font-bold text-[10px] uppercase tracking-wider opacity-80", risk.color)}>
+                      <p className={cn("font-bold text-[9px] uppercase tracking-wider opacity-80", risk.color)}>
                         ({nextAssessmentData.text})
                       </p>
                     </motion.div>
@@ -201,35 +212,36 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                 </motion.div>
               )}
             </AnimatePresence>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-2">
               <button
                 onClick={handleCloudSave}
                 disabled={!isComplete || isSaving}
                 className={cn(
-                  "flex-1 btn rounded-lg text-[10px] font-black py-3 flex gap-2 items-center justify-center border-2 transition-all",
+                  "flex-1 btn rounded-lg text-[10px] font-black py-4 flex gap-2 items-center justify-center border-2 transition-all",
                   isComplete
                     ? "bg-slate-900 text-white border-slate-800 shadow-md hover:bg-slate-800"
                     : "bg-muted text-muted-foreground cursor-not-allowed"
                 )}
               >
-                {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CloudUpload className="w-3.5 h-3.5" />}
-                <span>{isMobile && !isExpanded ? "" : "บันทึกข้อมูล"}</span>
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CloudUpload className="w-4 h-4" />}
+                <span className="hidden sm:inline">บันทึกคลาวด์</span>
               </button>
               <button
                 onClick={onCopySummary}
                 disabled={!isComplete}
                 className={cn(
-                  "flex-1 btn rounded-lg text-[10px] font-black py-3 flex gap-2 items-center justify-center border-2 transition-all",
+                  "flex-1 btn rounded-lg text-[10px] font-black py-4 flex gap-2 items-center justify-center border-2 transition-all",
                   isComplete ? "bg-teal-600 text-white border-teal-500 shadow-md hover:bg-teal-700" : "bg-muted text-muted-foreground cursor-not-allowed"
                 )}
               >
-                <Clipboard className="w-3.5 h-3.5" /> <span>{isMobile && !isExpanded ? "" : "สรุปพยาบาล"}</span>
+                <Clipboard className="w-4 h-4" /> <span className="hidden sm:inline">คัดลอกสรุป</span>
               </button>
               <button
                 onClick={onReset}
-                className="px-4 bg-background hover:bg-muted text-muted-foreground rounded-lg text-[10px] font-black py-3 border-2 border-border/50"
+                className="px-4 bg-background hover:bg-muted text-muted-foreground rounded-lg text-[10px] font-black py-4 border-2 border-border/50 transition-colors"
+                title="ล้างข้อมูล"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-4 h-4" />
               </button>
             </div>
           </div>

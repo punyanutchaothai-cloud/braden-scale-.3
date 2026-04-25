@@ -29,9 +29,13 @@ export function HomePage() {
   const totalScore = useMemo(() =>
     Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0),
   [scores]);
+  const parsedAge = useMemo(() => {
+    const val = parseInt(patientInfo.age);
+    return isNaN(val) ? undefined : val;
+  }, [patientInfo.age]);
   const currentRisk = useMemo(() =>
-    isComplete ? calculateRiskLevel(totalScore, parseInt(patientInfo.age)) : null,
-  [isComplete, totalScore, patientInfo.age]);
+    isComplete ? calculateRiskLevel(totalScore, parsedAge) : null,
+  [isComplete, totalScore, parsedAge]);
   const handleSelect = useCallback((categoryId: string, value: number) => {
     setScores(prev => ({ ...prev, [categoryId]: value }));
   }, []);
@@ -60,8 +64,8 @@ export function HomePage() {
       hour: 'numeric',
       minute: '2-digit'
     });
-    const nextText = formatter.format(nextTime);
-    const ageNum = parseInt(patientInfo.age || '0', 10);
+    const nextText = !isNaN(nextTime.getTime()) ? formatter.format(nextTime) : '-';
+    const ageNum = parsedAge ?? 0;
     const isAdult = ageNum > 5;
     let summaryText = `[สรุปผลประเมิน BRADEN SCALE]\n`;
     summaryText += `ผู้ป่วย: ${patientInfo.name || '-'}\n`;
@@ -71,26 +75,29 @@ export function HomePage() {
     summaryText += `----------------------------\n`;
     summaryText += `วันที่ประเมิน: ${patientInfo.date} เวลา ${patientInfo.time} น.\n`;
     summaryText += `คะแนนรวม: ${totalScore}/23 คะแนน\n`;
-    summaryText += `ระดับความเสี่ยง: ${currentRisk.label} (${currentRisk.assess_frequency})\n`;
+    summaryText += `ระดับความเสี่ยง: ${currentRisk.label}\n`;
     summaryText += `การวินิจฉัยทางการพยาบาล: ${currentRisk.dx}\n`;
     if (isAdult) {
       summaryText += `📅 ความถี่ประเมิน: ${currentRisk.assess_frequency}\n`;
       summaryText += `----------------------------\n`;
       summaryText += `🕒 ประเมินครั้งต่อไป: ${nextText} (${currentRisk.nextIntervalText})`;
+    } else {
+      summaryText += `----------------------------\n`;
+      summaryText += `หมายเหตุ: ${currentRisk.action}`;
     }
     navigator.clipboard.writeText(summaryText);
     toast.success("คัดลอกสรุปสำหรับบันทึกทางการพยาบาลแล้ว");
-  }, [isComplete, isPatientValid, patientInfo, totalScore, currentRisk]);
+  }, [isComplete, isPatientValid, patientInfo, totalScore, currentRisk, parsedAge]);
   return (
     <div className={cn(
-      "min-h-screen transition-all duration-1000 ease-out pb-80 lg:pb-24",
+      "min-h-screen transition-all duration-1000 ease-out pb-[28rem] sm:pb-80 lg:pb-24",
       isComplete ? currentRisk?.bg : "bg-slate-50 dark:bg-slate-950"
     )}>
       <div className="bg-slate-900 border-b border-slate-800 relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <button onClick={() => setShowLogic(!showLogic)} className="py-3 text-slate-400 hover:text-white text-[10px] font-mono font-bold tracking-wider flex items-center gap-3">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            CLINICAL ENGINE v2.2
+            CLINICAL ENGINE v2.3
           </button>
           <div className="flex items-center gap-4">
             <Authenticated>
@@ -128,7 +135,18 @@ export function HomePage() {
             </Unauthenticated>
           </div>
         </div>
-        <AnimatePresence>{showLogic && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}><LogicPreview /></motion.div>}</AnimatePresence>
+        <AnimatePresence>
+          {showLogic && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }} 
+              animate={{ height: 'auto', opacity: 1 }} 
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <LogicPreview />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <ThemeToggle />
       <header className="bg-background/60 backdrop-blur-2xl border-b sticky top-0 z-40 shadow-sm">
@@ -136,8 +154,10 @@ export function HomePage() {
           <div className="flex items-center gap-3">
             <div className="bg-primary p-2.5 rounded-xl shadow-xl"><ShieldCheck className="w-6 h-6 text-primary-foreground" /></div>
             <div>
-              <h1 className="text-xl font-black text-foreground tracking-tight flex items-center gap-2">Braden Scale Pro {isComplete && <Activity className={cn("w-4 h-4 animate-pulse", currentRisk?.color)} />}</h1>
-              <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em]">Thai Medical Guideline</p>
+              <h1 className="text-xl font-black text-foreground tracking-tight flex items-center gap-2">
+                Braden Scale Pro {isComplete && <Activity className={cn("w-4 h-4 animate-pulse", currentRisk?.color)} />}
+              </h1>
+              <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em]">Thai Medical Guideline v2.3</p>
             </div>
           </div>
         </div>
@@ -150,11 +170,21 @@ export function HomePage() {
               <section key={category.id} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="mb-4 flex items-center gap-3">
                   <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-foreground text-background font-black text-sm">{index + 1}</span>
-                  <div><h2 className="text-xl font-black text-foreground">{category.title}</h2><p className="text-[11px] text-muted-foreground font-medium">{category.description}</p></div>
+                  <div>
+                    <h2 className="text-xl font-black text-foreground">{category.title}</h2>
+                    <p className="text-[11px] text-muted-foreground font-medium">{category.description}</p>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {category.options.map((option) => (
-                    <SelectableCard key={option.value} selected={scores[category.id] === option.value} onClick={() => handleSelect(category.id, option.value)} label={option.label} description={option.description} value={option.value} />
+                    <SelectableCard 
+                      key={option.value} 
+                      selected={scores[category.id] === option.value} 
+                      onClick={() => handleSelect(category.id, option.value)} 
+                      label={option.label} 
+                      description={option.description} 
+                      value={option.value} 
+                    />
                   ))}
                 </div>
               </section>
