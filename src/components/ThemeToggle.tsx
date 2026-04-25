@@ -1,15 +1,15 @@
+import React from "react";
 import { Moon, Sun } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
-
 interface ThemeToggleProps {
   className?: string;
 }
-
 export function ThemeToggle({ className = "absolute top-4 right-4" }: ThemeToggleProps) {
-  const { isDark, toggleTheme } = useTheme();
-
+  const theme = useTheme();
+  // Guard for safety during hydration/early render
+  if (!theme) return null;
+  const { isDark, toggleTheme } = theme;
   return (
     <Button
       onClick={toggleTheme}
