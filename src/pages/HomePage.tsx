@@ -27,14 +27,14 @@ export function HomePage() {
   const currentRisk = isComplete ? calculateRiskLevel(totalScore) : null;
   useEffect(() => {
     if (isComplete && !isPatientValid) {
-      toast.warning("Patient Data Required", {
-        description: "Please enter Name and HN for full clinical documentation.",
+      toast.warning("ข้อมูลผู้ป่วยไม่ครบถ้วน", {
+        description: "กรุณาระบุชื่อและเลข HN เพื่อการบันทึกข้อมูลทางคลินิกที่สมบูรณ์",
         id: "validation-warning",
       });
     }
     if (isComplete) {
-      toast.success("Assessment Complete", {
-        description: `Risk Level: ${currentRisk?.label}`,
+      toast.success("ประเมินเสร็จสิ้น", {
+        description: `ระดับความเสี่ยง: ${currentRisk?.label}`,
         duration: 5000,
       });
     }
@@ -55,19 +55,19 @@ export function HomePage() {
       friction: null,
     });
     resetPatientInfo();
-    toast.info("Assessment Cleared");
+    toast.info("ล้างข้อมูลการประเมินแล้ว");
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const handleCopySummary = useCallback(() => {
     if (!isComplete) {
-      toast.error("Incomplete Assessment", { description: "Answer all 6 categories first." });
+      toast.error("การประเมินยังไม่สมบูรณ์", { description: "กรุณาตอบให้ครบทั้ง 6 หมวดหมู่" });
       return;
     }
     const risk = calculateRiskLevel(totalScore);
-    let summaryText = `[BRADEN SCALE ASSESSMENT SUMMARY]\n`;
+    let summaryText = `[BRADEN SCALE ASSESSMENT SUMMARY / สรุปผลการประเมิน Braden Scale]\n`;
     summaryText += `Clinical Timestamp: ${patientInfo.date} @ ${patientInfo.time}\n`;
-    summaryText += `Patient: ${patientInfo.name || 'N/A'}\n`;
-    summaryText += `HN: ${patientInfo.hn || 'N/A'} | Bed: ${patientInfo.bed || 'N/A'}\n`;
+    summaryText += `Patient / ผู้ป่วย: ${patientInfo.name || 'N/A'}\n`;
+    summaryText += `HN: ${patientInfo.hn || 'N/A'} | Ward/Bed: ${patientInfo.bed || 'N/A'}\n`;
     summaryText += `--------------------------------------------\n`;
     BRADEN_CATEGORIES.forEach(cat => {
       const val = scores[cat.id];
@@ -75,22 +75,21 @@ export function HomePage() {
       summaryText += `${cat.title}: ${val} (${opt?.label || '-'})\n`;
     });
     summaryText += `--------------------------------------------\n`;
-    summaryText += `TOTAL SCORE: ${totalScore}/23\n`;
-    summaryText += `RISK LEVEL: ${risk.label}\n`;
-    summaryText += `RECOMMENDED ACTION: ${risk.action}\n`;
+    summaryText += `TOTAL SCORE / คะแนนรวม: ${totalScore}/23\n`;
+    summaryText += `RISK LEVEL / ระดับความเสี่ยง: ${risk.label}\n`;
+    summaryText += `RECOMMENDED ACTION / ข้อแนะนำ: ${risk.action}\n`;
     navigator.clipboard.writeText(summaryText).then(() => {
-      toast.success("Summary Copied to Clipboard");
+      toast.success("คัดลอกสรุปผลลงคลิปบอร์ดแล้ว");
       console.log(`[Clinical Audit] Summary generated for ${patientInfo.hn}. Risk: ${risk.label}`);
     }).catch(() => {
-      toast.error("Clipboard Error");
+      toast.error("เกิดข้อผิดพลาดในการคัดลอก");
     });
   }, [scores, isComplete, patientInfo, totalScore]);
   return (
     <div className={cn(
-      "min-h-screen transition-all duration-1500 ease-out pb-56 lg:pb-20",
-      isComplete ? currentRisk?.bg : "bg-background"
+      "min-h-screen transition-all duration-1000 ease-out pb-64 lg:pb-20",
+      isComplete ? currentRisk?.bg : "bg-slate-50 dark:bg-slate-950"
     )}>
-      {/* Logic Header */}
       <div className="bg-slate-900 border-b border-slate-800 relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
@@ -99,11 +98,11 @@ export function HomePage() {
           >
             <div className="flex items-center gap-3">
               <span className="flex h-2 w-2 rounded-full bg-teal-500 animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.8)]" />
-              CLINICAL ALGORITHM ENGINE v1.0
+              CLINICAL ALGORITHM ENGINE (Thai Optimized)
             </div>
             <div className="flex items-center gap-2">
               {showLogic ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              <span>{showLogic ? 'MINIMIZE' : 'EXPAND'} LOGIC</span>
+              <span>{showLogic ? 'ปิดส่วนอัลกอริทึม' : 'แสดงอัลกอริทึม'}</span>
             </div>
           </button>
         </div>
@@ -135,49 +134,46 @@ export function HomePage() {
                   {isComplete && <Activity className={cn("w-5 h-5 animate-bounce", currentRisk?.color)} />}
                 </h1>
                 <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.3em]">
-                  Diagnostic Decision Support
+                  Nursing Decision Support System
                 </p>
               </div>
             </div>
             <div className="hidden lg:flex items-center gap-3 text-xs text-muted-foreground font-black bg-muted/50 px-5 py-2.5 rounded-full border border-border/50">
               <Info className="w-4 h-4 text-primary" />
-              <span>VALIDATED CLINICAL INSTRUMENT</span>
+              <span>VALIDATED CLINICAL INSTRUMENT (THAI)</span>
             </div>
           </div>
         </div>
       </header>
-      <main 
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 lg:py-24"
-        aria-live="assertive"
-      >
-        <div className="mb-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
+        <div className="mb-12">
           <PatientInfoForm
             patientInfo={patientInfo}
             onUpdate={updateField}
           />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-start">
-          <div className="lg:col-span-8 space-y-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+          <div className="lg:col-span-8 space-y-16">
             {BRADEN_CATEGORIES.map((category, index) => (
               <section
                 key={category.id}
-                className="animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both"
-                style={{ animationDelay: `${index * 150}ms` }}
+                className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="mb-10">
-                  <div className="flex items-center gap-6 mb-4">
-                    <span className="flex items-center justify-center w-12 h-12 rounded-[20px] bg-foreground text-background font-black text-xl shadow-2xl">
+                <div className="mb-6">
+                  <div className="flex items-center gap-4 mb-2">
+                    <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-foreground text-background font-black text-lg">
                       {index + 1}
                     </span>
-                    <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
+                    <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                       {category.title}
                     </h2>
                   </div>
-                  <p className="text-muted-foreground ml-2 text-xl font-medium leading-relaxed max-w-2xl opacity-80">
+                  <p className="text-muted-foreground ml-14 text-lg font-medium opacity-80">
                     {category.description}
                   </p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {category.options.map((option) => (
                     <SelectableCard
                       key={option.value}
@@ -203,17 +199,15 @@ export function HomePage() {
           </aside>
         </div>
       </main>
-      <footer className="border-t mt-32 py-20 bg-muted/10 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="flex justify-center mb-8">
-            <div className="w-12 h-1 px-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-          </div>
-          <p className="text-muted-foreground text-sm font-black tracking-widest uppercase opacity-60 mb-4">
-            Clinical Safety Disclaimer
+      <footer className="border-t mt-32 py-16 bg-muted/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-muted-foreground text-xs font-black tracking-widest uppercase opacity-60 mb-3">
+            ข้อกำหนดและเงื่อนไขการใช้งานทางคลินิก
           </p>
-          <p className="text-muted-foreground/60 text-xs leading-relaxed max-w-2xl mx-auto font-medium">
-            © {new Date().getFullYear()} Braden Scale Pro. This software is designed for professional use by trained healthcare personnel.
-            All assessment results should be clinically validated and integrated into the patient's comprehensive nursing care plan.
+          <p className="text-muted-foreground/60 text-[10px] leading-relaxed max-w-2xl mx-auto font-medium">
+            ซอฟต์แวร์นี้ออกแบบมาเพื่อใช้งานโดยบุคลากรทางการแพทย์ที่ผ่านการฝึกอบรมเท่านั้น 
+            ผลการประเมินควรได้รับการตรวจสอบทางคลินิกและบูรณาการเข้ากับแผนการพยาบาลที่ครอบคลุมของผู้ป่วย 
+            © {new Date().getFullYear()} Braden Scale Pro.
           </p>
         </div>
       </footer>

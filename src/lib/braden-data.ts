@@ -12,67 +12,67 @@ export interface BradenCategory {
 export const BRADEN_CATEGORIES: BradenCategory[] = [
   {
     id: "sensory",
-    title: "Sensory Perception",
-    description: "Ability to respond meaningfully to pressure-related discomfort",
+    title: "การรับความรู้สึก (Sensory Perception)",
+    description: "ความสามารถในการตอบสนองต่อความรู้สึกไม่สบายจากการถูกกดทับ",
     options: [
-      { value: 1, label: "Completely Limited", description: "Unresponsive (does not moan, flinch, or grasp) to painful stimuli." },
-      { value: 2, label: "Very Limited", description: "Responds only to painful stimuli. Cannot communicate discomfort except by moaning." },
-      { value: 3, label: "Slightly Limited", description: "Responds to verbal commands but cannot always communicate discomfort." },
-      { value: 4, label: "No Impairment", description: "Responds to verbal commands. Has no sensory deficit which would limit ability to feel pain." },
+      { value: 1, label: "จำกัดอย่างมาก (Completely Limited)", description: "ไม่ตอบสนองต่อสิ่งกระตุ้นที่ทำให้เจ็บปวด (ไม่คราง ไม่ขยับหนี หรือไม่ไขว่คว้า) เนื่องจากระดับความรู้สึกตัวลดลงหรือได้รับยาระงับความรู้สึก" },
+      { value: 2, label: "จำกัดมาก (Very Limited)", description: "ตอบสนองเฉพาะสิ่งกระตุ้นที่ทำให้เจ็บปวดเท่านั้น ไม่สามารถบอกความรู้สึกไม่สบายได้นอกจากครางหรือกระสับกระส่าย" },
+      { value: 3, label: "จำกัดเล็กน้อย (Slightly Limited)", description: "ตอบสนองต่อเสียงเรียก แต่ไม่สามารถบอกความรู้สึกไม่สบายได้เสมอไป หรือมีปัญหาการรับความรู้สึกที่จำกัดความสามารถในการรับรู้ความเจ็บปวดใน 1 หรือ 2 ส่วนของร่างกาย" },
+      { value: 4, label: "ไม่มีความบกพร่อง (No Impairment)", description: "ตอบสนองต่อเสียงเรียกได้ดี ไม่มีปัญหาการรับความรู้สึกที่จะจำกัดความสามารถในการรับรู้หรือบอกความเจ็บปวด" },
     ],
   },
   {
     id: "moisture",
-    title: "Moisture",
-    description: "Degree to which skin is exposed to moisture",
+    title: "ความเปียกชื้น (Moisture)",
+    description: "ระดับที่ผิวหนังต้องสัมผัสกับความเปียกชื้น",
     options: [
-      { value: 1, label: "Constantly Moist", description: "Skin is kept moist almost constantly by perspiration, urine, etc." },
-      { value: 2, label: "Very Moist", description: "Skin is often, but not always moist. Linen must be changed at least once a shift." },
-      { value: 3, label: "Occasionally Moist", description: "Skin is occasionally moist, requiring an extra linen change approximately once a day." },
-      { value: 4, label: "Rarely Moist", description: "Skin is usually dry, linen only requires changing at routine intervals." },
+      { value: 1, label: "ชื้นตลอดเวลา (Constantly Moist)", description: "ผิวหนังเปียกชื้นเกือบตลอดเวลาจากเหงื่อ ปัสสาวะ ฯลฯ พบความชื้นทุกครั้งที่พลิกตัวผู้ป่วย" },
+      { value: 2, label: "ชื้นบ่อย (Very Moist)", description: "ผิวหนังเปียกชื้นบ่อยแต่ไม่ตลอดเวลา ต้องเปลี่ยนผ้าปูที่นอนอย่างน้อยวันละ 1 ครั้งต่อเวร" },
+      { value: 3, label: "ชื้นบางครั้ง (Occasionally Moist)", description: "ผิวหนังเปียกชื้นเป็นบางครั้ง ต้องเปลี่ยนผ้าปูที่นอนเพิ่มพิเศษประมาณวันละ 1 ครั้ง" },
+      { value: 4, label: "แห้งหายาก (Rarely Moist)", description: "ผิวหนังแห้งเป็นปกติ เปลี่ยนผ้าปูที่นอนตามกิจวัตรปกติเท่านั้น" },
     ],
   },
   {
     id: "activity",
-    title: "Activity",
-    description: "Degree of physical activity",
+    title: "กิจกรรม (Activity)",
+    description: "ระดับของการทำกิจกรรมทางกาย",
     options: [
-      { value: 1, label: "Bedfast", description: "Confined to bed." },
-      { value: 2, label: "Chairfast", description: "Ability to walk severely limited or nonexistent. Cannot bear own weight." },
-      { value: 3, label: "Walks Occasionally", description: "Walks occasionally during day, but for very short distances, with or without assistance." },
-      { value: 4, label: "Walks Frequently", description: "Walks outside room at least twice a day and inside room at least once every two hours." },
+      { value: 1, label: "นอนบนเตียงตลอด (Bedfast)", description: "จำกัดอยู่แต่บนเตียงตลอดเวลา" },
+      { value: 2, label: "นั่งบนเก้าอี้ตลอด (Chairfast)", description: "ความสามารถในการเดินจำกัดมากหรือไม่สามารถเดินได้เลย ไม่สามารถรับน้ำหนักตัวเองได้ ต้องช่วยพยุงลงเก้าอี้หรือรถเข็น" },
+      { value: 3, label: "เดินได้บ้าง (Walks Occasionally)", description: "เดินได้บ้างในระหว่างวันแต่ในระยะทางสั้นๆ โดยอาจต้องมีคนช่วยหรือไม่ต้องก็ได้ ใช้เวลาส่วนใหญ่บนเตียงหรือเก้าอี้" },
+      { value: 4, label: "เดินได้บ่อย (Walks Frequently)", description: "เดินนอกห้องได้อย่างน้อยวันละ 2 ครั้ง และเดินในห้องได้อย่างน้อยทุกๆ 2 ชั่วโมง" },
     ],
   },
   {
     id: "mobility",
-    title: "Mobility",
-    description: "Ability to change and control body position",
+    title: "การเคลื่อนไหว (Mobility)",
+    description: "ความสามารถในการเปลี่ยนและควบคุมตำแหน่งของร่างกาย",
     options: [
-      { value: 1, label: "Completely Immobile", description: "Does not make even slight changes in body or extremity position without assistance." },
-      { value: 2, label: "Very Limited", description: "Makes occasional slight changes in body or extremity position but unable to make frequent or significant changes independently." },
-      { value: 3, label: "Slightly Limited", description: "Makes frequent though slight changes in body or extremity position independently." },
-      { value: 4, label: "No Limitation", description: "Makes major and frequent changes in position without assistance." },
+      { value: 1, label: "เคลื่อนไหวไม่ได้เลย (Completely Immobile)", description: "ไม่สามารถขยับตัวหรือเปลี่ยนตำแหน่งของร่างกายหรือแขนขาได้เลยแม้เพียงเล็กน้อยโดยไม่มีคนช่วย" },
+      { value: 2, label: "ข้อจำกัดมาก (Very Limited)", description: "สามารถขยับตัวหรือแขนขาได้บ้างเล็กน้อยเป็นบางครั้ง แต่ไม่สามารถเปลี่ยนตำแหน่งร่างกายได้เองบ่อยๆ หรืออย่างมีนัยสำคัญ" },
+      { value: 3, label: "ข้อจำกัดเล็กน้อย (Slightly Limited)", description: "สามารถเปลี่ยนตำแหน่งของร่างกายหรือแขนขาได้เองบ่อยๆ แม้จะเป็นการขยับเพียงเล็กน้อย" },
+      { value: 4, label: "ไม่มีข้อจำกัด (No Limitation)", description: "สามารถเปลี่ยนตำแหน่งร่างกายได้บ่อยๆ และทำได้เองอย่างสมบูรณ์โดยไม่ต้องมีคนช่วย" },
     ],
   },
   {
     id: "nutrition",
-    title: "Nutrition",
-    description: "Usual food intake pattern",
+    title: "ภาวะโภชนาการ (Nutrition)",
+    description: "รูปแบบการรับประทานอาหารตามปกติ",
     options: [
-      { value: 1, label: "Very Poor", description: "Never eats a complete meal. Rarely eats more than 1/3 of any food offered." },
-      { value: 2, label: "Probably Inadequate", description: "Rarely eats a complete meal and generally eats only about 1/2 of any food offered." },
-      { value: 3, label: "Adequate", description: "Eats over half of most meals. Eats a total of 4 servings of protein per day." },
-      { value: 4, label: "Excellent", description: "Eats most of every meal. Never refuses a meal. Occasionally eats between meals." },
+      { value: 1, label: "แย่มาก (Very Poor)", description: "รับประทานอาหารไม่เคยหมดมื้อ รับประทานได้น้อยกว่า 1/3 ของอาหารที่จัดให้ ดื่มน้ำน้อย หรือ NPO" },
+      { value: 2, label: "ไม่เพียงพอ (Probably Inadequate)", description: "รับประทานอาหารหมดเป็นบางมื้อ และโดยทั่วไปรับประทานได้เพียงประมาณ 1/2 ของอาหารที่จัดให้" },
+      { value: 3, label: "เพียงพอ (Adequate)", description: "รับประทานอาหารได้มากกว่าครึ่งหนึ่งของเกือบทุกมื้อ รับประทานโปรตีนได้เพียงพอ" },
+      { value: 4, label: "ดีเยี่ยม (Excellent)", description: "รับประทานอาหารหมดเกือบทุกมื้อ ไม่เคยปฏิเสธอาหาร รับประทานอาหารว่างระหว่างมื้อเป็นประจำ" },
     ],
   },
   {
     id: "friction",
-    title: "Friction & Shear",
-    description: "Interactions with surfaces during movement",
+    title: "แรงเสียดทานและแรงเฉือน (Friction & Shear)",
+    description: "การปฏิสัมพันธ์กับพื้นผิวระหว่างการเคลื่อนที่",
     options: [
-      { value: 1, label: "Problem", description: "Requires moderate to maximum assistance in moving. Sliding against sheets is likely." },
-      { value: 2, label: "Potential Problem", description: "Moves feebly or requires minimum assistance. Skin probably slides against sheets." },
-      { value: 3, label: "No Apparent Problem", description: "Moves in bed and in chair independently and has sufficient muscle strength to lift up completely." },
+      { value: 1, label: "มีปัญหา (Problem)", description: "ต้องการความช่วยเหลือปานกลางถึงมากในการเคลื่อนย้าย ผิวหนังถลอกหรือครูดกับผ้าปูที่นอนบ่อย" },
+      { value: 2, label: "อาจมีปัญหา (Potential Problem)", description: "เคลื่อนไหวได้เองบ้างอย่างอ่อนแรง หรือต้องการความช่วยเหลือเล็กน้อย ผิวหนังอาจครูดกับผ้าปูที่นอนหรือเก้าอี้บ้าง" },
+      { value: 3, label: "ไม่มีปัญหา (No Apparent Problem)", description: "เคลื่อนไหวบนเตียงและเก้าอี้ได้เองอย่างอิสระ มีกำลังกล้ามเนื้อเพียงพอที่จะยกตัวพ้นพื้นผิวขณะเคลื่อนย้าย" },
     ],
   },
 ];
@@ -115,48 +115,48 @@ export const getScoreColor = (value: number) => {
 };
 export const calculateRiskLevel = (score: number) => {
   if (score <= 9) return {
-    label: "Severe Risk",
+    label: "เสี่ยงสูงมาก (Severe Risk)",
     color: "text-red-600 dark:text-red-400",
     bg: "bg-red-100/98 dark:bg-red-950/60",
     border: "border-red-300 dark:border-red-900",
     glow: "drop-shadow-[0_0_30px_rgba(220,38,38,0.7)]",
-    ariaLabel: "Severe pressure ulcer risk. Score 9 or less. Requires immediate intensive intervention.",
-    action: "Immediate intensive intervention and pressure-relief strategy required."
+    ariaLabel: "ระดับความเสี่ยงสูงมาก คะแนน 9 หรือน้อยกว่า จำเป็นต้องได้รับการดูแลอย่างเร่งด่วน",
+    action: "ต้องการการดูแลอย่างเร่งด่วนและแผนการลดแรงกดทับอย่างเข้มข้นทันที"
   };
   if (score <= 12) return {
-    label: "High Risk",
+    label: "เสี่ยงสูง (High Risk)",
     color: "text-orange-600 dark:text-orange-400",
     bg: "bg-orange-100/98 dark:bg-orange-950/60",
     border: "border-orange-300 dark:border-orange-900",
     glow: "drop-shadow-[0_0_30px_rgba(234,88,12,0.6)]",
-    ariaLabel: "High pressure ulcer risk. Score 10 to 12. Strict turning schedule and pressure-reducing surface mandatory.",
-    action: "Strict turning schedule and pressure-reducing surface mandatory."
+    ariaLabel: "ระดับความเสี่ยงสูง คะแนน 10 ถึง 12 ต้องกำหนดตารางพลิกตัวที่เข้มงวด",
+    action: "กำหนดตารางพลิกตัวที่เข้มงวดและใช้อุปกรณ์รองรับเพื่อลดแรงกดทับ"
   };
   if (score <= 14) return {
-    label: "Moderate Risk",
+    label: "เสี่ยงปานกลาง (Moderate Risk)",
     color: "text-amber-600 dark:text-amber-400",
     bg: "bg-amber-50/98 dark:bg-amber-950/60",
     border: "border-amber-300 dark:border-amber-900",
     glow: "drop-shadow-[0_0_30px_rgba(217,119,6,0.5)]",
-    ariaLabel: "Moderate pressure ulcer risk. Score 13 to 14. Increase monitoring and adjunct devices.",
-    action: "Increase monitoring and consider adjunct pressure-relief devices."
+    ariaLabel: "ระดับความเสี่ยงปานกลาง คะแนน 13 ถึง 14 เพิ่มการเฝ้าระวังและใช้อุปกรณ์เสริม",
+    action: "เพิ่มการเฝ้าระวังและพิจารณาใช้อุปกรณ์เสริมเพื่อช่วยลดแรงกดทับ"
   };
   if (score <= 18) return {
-    label: "Mild Risk",
+    label: "เสี่ยงต่ำ (Mild Risk)",
     color: "text-yellow-600 dark:text-yellow-400",
     bg: "bg-yellow-50/98 dark:bg-yellow-950/60",
     border: "border-yellow-300 dark:border-yellow-900",
     glow: "drop-shadow-[0_0_30px_rgba(202,138,4,0.4)]",
-    ariaLabel: "Mild pressure ulcer risk. Score 15 to 18. Maintain skin hygiene and regular reassessment.",
-    action: "Maintain skin hygiene and reassess on defined regular intervals."
+    ariaLabel: "ระดับความเสี่ยงต่ำ คะแนน 15 ถึง 18 รักษาสุขอนามัยของผิวหนังและประเมินซ้ำตามระยะ",
+    action: "รักษาสุขอนามัยของผิวหนังและประเมินซ้ำตามรอบระยะเวลาที่กำหนด"
   };
   return {
-    label: "No Risk",
+    label: "ไม่มีความเสี่ยง (No Risk)",
     color: "text-emerald-600 dark:text-emerald-400",
     bg: "bg-emerald-50/98 dark:bg-emerald-950/60",
     border: "border-emerald-300 dark:border-emerald-900",
     glow: "drop-shadow-[0_0_30px_rgba(5,150,105,0.4)]",
-    ariaLabel: "No apparent pressure ulcer risk. Score 19 to 23. Standard care and periodic reassessment.",
-    action: "Reassess if patient's clinical status changes significantly."
+    ariaLabel: "ไม่มีความเสี่ยงที่ชัดเจน คะแนน 19 ถึง 23 ดูแลตามมาตรฐานและประเมินซ้ำเมื่ออาการเปลี่ยน",
+    action: "ดูแลตามมาตรฐานและประเมินซ้ำหากสภาวะทางคลินิกของผู้ป่วยเปลี่ยนแปลงอย่างมีนัยสำคัญ"
   };
 };
