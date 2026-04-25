@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
+import { getScoreColor } from '@/lib/braden-data';
 interface SelectableCardProps {
   selected: boolean;
   onClick: () => void;
@@ -10,38 +11,43 @@ interface SelectableCardProps {
   value: number;
 }
 export function SelectableCard({ selected, onClick, label, description, value }: SelectableCardProps) {
+  const scoreColors = getScoreColor(value);
   return (
     <Card
       onClick={onClick}
+      role="radio"
+      aria-checked={selected}
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
       className={cn(
-        "relative flex flex-col p-4 cursor-pointer transition-all duration-200 border-2 group min-h-[140px]",
+        "relative flex flex-col p-5 cursor-pointer transition-all duration-300 border-2 group min-h-[150px] rounded-2xl",
         selected
-          ? "border-teal-600 bg-teal-50/50 dark:bg-teal-950/20 ring-1 ring-teal-600/20 shadow-md"
-          : "border-transparent bg-card hover:border-teal-200 dark:hover:border-teal-800 hover:bg-accent/50 shadow-sm"
+          ? cn(scoreColors.border, scoreColors.bg, "ring-2 ring-offset-2 dark:ring-offset-background shadow-xl scale-[1.02] z-10")
+          : cn("border-transparent bg-card shadow-sm hover:shadow-md", scoreColors.hover)
       )}
     >
-      <div className="flex justify-between items-start mb-2">
+      <div className="flex justify-between items-start mb-3">
         <span className={cn(
-          "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded",
-          selected 
-            ? "bg-teal-600 text-white" 
-            : "bg-muted text-muted-foreground group-hover:bg-teal-100 group-hover:text-teal-700 dark:group-hover:bg-teal-900 dark:group-hover:text-teal-300"
+          "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full transition-colors",
+          selected
+            ? cn(scoreColors.accent, "text-white shadow-lg")
+            : "bg-muted text-muted-foreground group-hover:bg-muted/80"
         )}>
           Score: {value}
         </span>
         {selected && (
-          <CheckCircle2 className="w-5 h-5 text-teal-600 animate-in fade-in zoom-in duration-300" />
+          <CheckCircle2 className={cn("w-6 h-6 animate-in fade-in zoom-in duration-500", scoreColors.text)} />
         )}
       </div>
       <h4 className={cn(
-        "font-semibold text-base mb-1 leading-tight",
-        selected ? "text-teal-900 dark:text-teal-100" : "text-foreground"
+        "font-bold text-lg mb-2 leading-tight transition-colors",
+        selected ? scoreColors.text : "text-foreground"
       )}>
         {label}
       </h4>
       <p className={cn(
-        "text-sm leading-relaxed",
-        selected ? "text-teal-800/80 dark:text-teal-400/80" : "text-muted-foreground"
+        "text-sm leading-relaxed transition-colors",
+        selected ? "text-foreground/80 font-medium" : "text-muted-foreground"
       )}>
         {description}
       </p>

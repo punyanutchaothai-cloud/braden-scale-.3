@@ -7,8 +7,9 @@ import { Toaster, toast } from 'sonner';
 import { LogicPreview } from '@/components/LogicPreview';
 import { PatientInfoForm } from '@/components/PatientInfoForm';
 import { usePatientInfo } from '@/hooks/use-patient-info';
-import { ShieldCheck, Info, ChevronUp, ChevronDown } from 'lucide-react';
+import { ShieldCheck, Info, ChevronUp, ChevronDown, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 export function HomePage() {
   const { patientInfo, updateField, resetPatientInfo, isPatientValid } = usePatientInfo();
   const [showLogic, setShowLogic] = useState(false);
@@ -22,13 +23,22 @@ export function HomePage() {
   });
   const answeredCount = Object.values(scores).filter((v) => v !== null).length;
   const isComplete = answeredCount === 6;
+  const totalScore = Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0);
+  const currentRisk = isComplete ? calculateRiskLevel(totalScore) : null;
   useEffect(() => {
     if (isComplete && !isPatientValid) {
-      toast.warning("กรุณากรอกชื่อและ HN ผู้ป่วยเพื่อให้การประเมินสมบูรณ์", {
+      toast.warning("Patient Data Required", {
+        description: "Please enter Name and HN for full clinical documentation.",
         id: "validation-warning",
       });
     }
-  }, [isComplete, isPatientValid]);
+    if (isComplete) {
+      toast.success("Assessment Complete", {
+        description: `Risk Level: ${currentRisk?.label}`,
+        duration: 5000,
+      });
+    }
+  }, [isComplete, isPatientValid, currentRisk?.label]);
   const handleSelect = (categoryId: string, value: number) => {
     setScores(prev => ({
       ...prev,
@@ -45,54 +55,55 @@ export function HomePage() {
       friction: null,
     });
     resetPatientInfo();
-    toast.info("ล้างข้อมูลการประเมินเรียบร้อยแล้ว");
+    toast.info("Assessment Cleared");
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const handleCopySummary = useCallback(() => {
     if (!isComplete) {
-      toast.error("กรุณาประเมินให้ครบทั้ง 6 หัวข้อก่อนคัดลอกสรุป");
+      toast.error("Incomplete Assessment", { description: "Answer all 6 categories first." });
       return;
     }
-    if (!isPatientValid) {
-      toast.warning("ข้อมูลผู้ป่วยไม่ครบถ้วน (ชื่อ/HN) สรุปผลอาจไม่สมบูรณ์สำหรับการบันทึกทางการแพทย์");
-    }
-    const totalScore = Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0);
     const risk = calculateRiskLevel(totalScore);
-    let summaryText = `[สรุปผลการประเมิน Braden Scale]\n`;
-    summaryText += `วันที่: ${patientInfo.date} เวลา: ${patientInfo.time}\n`;
-    summaryText += `ผู้ป่วย: ${patientInfo.name || 'ไม่ได้ระบุ'}\n`;
-    summaryText += `HN: ${patientInfo.hn || 'ไม่ได้ระบุ'} | เตียง: ${patientInfo.bed || 'ไม่ได้ระบุ'}\n`;
-    summaryText += `----------------------------\n`;
+    let summaryText = `[BRADEN SCALE ASSESSMENT SUMMARY]\n`;
+    summaryText += `Clinical Timestamp: ${patientInfo.date} @ ${patientInfo.time}\n`;
+    summaryText += `Patient: ${patientInfo.name || 'N/A'}\n`;
+    summaryText += `HN: ${patientInfo.hn || 'N/A'} | Bed: ${patientInfo.bed || 'N/A'}\n`;
+    summaryText += `--------------------------------------------\n`;
     BRADEN_CATEGORIES.forEach(cat => {
       const val = scores[cat.id];
       const opt = cat.options.find(o => o.value === val);
-      summaryText += `${cat.title}: ${val} คะแนน (${opt?.label || '-'})\n`;
+      summaryText += `${cat.title}: ${val} (${opt?.label || '-'})\n`;
     });
-    summaryText += `----------------------------\n`;
-    summaryText += `คะแนนรวม: ${totalScore} คะแนน\n`;
-    summaryText += `ระดับความเสี่ยง: ${risk.label}\n`;
-    summaryText += `คำแนะนำ: ${risk.action}\n`;
+    summaryText += `--------------------------------------------\n`;
+    summaryText += `TOTAL SCORE: ${totalScore}/23\n`;
+    summaryText += `RISK LEVEL: ${risk.label}\n`;
+    summaryText += `RECOMMENDED ACTION: ${risk.action}\n`;
     navigator.clipboard.writeText(summaryText).then(() => {
-      toast.success("คัดลอกสรุปผลการประเมินไปยังคลิปบอร์ดแล้ว");
+      toast.success("Summary Copied to Clipboard");
+      console.log(`[Clinical Audit] Summary generated for ${patientInfo.hn}. Risk: ${risk.label}`);
     }).catch(() => {
-      toast.error("ไม่สามารถคัดลอกข้อมูลได้");
+      toast.error("Clipboard Error");
     });
-  }, [scores, isComplete, patientInfo, isPatientValid]);
+  }, [scores, isComplete, patientInfo, totalScore]);
   return (
-    <div className="min-h-screen bg-background text-foreground pb-48 lg:pb-12 transition-colors duration-300">
-      <div className="bg-slate-900 border-b border-slate-800">
+    <div className={cn(
+      "min-h-screen transition-all duration-1500 ease-out pb-56 lg:pb-20",
+      isComplete ? currentRisk?.bg : "bg-background"
+    )}>
+      {/* Logic Header */}
+      <div className="bg-slate-900 border-b border-slate-800 relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <button 
+          <button
             onClick={() => setShowLogic(!showLogic)}
-            className="flex items-center justify-between w-full py-3 text-slate-400 hover:text-white transition-colors text-xs font-mono"
+            className="flex items-center justify-between w-full py-3 text-slate-400 hover:text-white transition-colors text-xs font-mono font-bold"
           >
-            <div className="flex items-center gap-2">
-              <span className="flex h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
-              CLINICAL ALGORITHM PREVIEW
+            <div className="flex items-center gap-3">
+              <span className="flex h-2 w-2 rounded-full bg-teal-500 animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.8)]" />
+              CLINICAL ALGORITHM ENGINE v1.0
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {showLogic ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              <span>{showLogic ? 'HIDE' : 'SHOW'} LOGIC</span>
+              <span>{showLogic ? 'MINIMIZE' : 'EXPAND'} LOGIC</span>
             </div>
           </button>
         </div>
@@ -102,7 +113,7 @@ export function HomePage() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              transition={{ duration: 0.4, ease: 'circOut' }}
               className="overflow-hidden"
             >
               <LogicPreview />
@@ -111,56 +122,62 @@ export function HomePage() {
         </AnimatePresence>
       </div>
       <ThemeToggle />
-      <header className="bg-background/80 backdrop-blur-md border-b sticky top-0 z-40 shadow-sm transition-all">
+      <header className="bg-background/60 backdrop-blur-2xl border-b sticky top-0 z-40 shadow-sm transition-all duration-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-teal-600 p-2 rounded-xl shadow-lg shadow-teal-600/20">
-                <ShieldCheck className="w-6 h-6 text-white" />
+          <div className="py-5 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="bg-primary p-3 rounded-2xl shadow-2xl shadow-primary/30">
+                <ShieldCheck className="w-7 h-7 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-display font-bold text-foreground tracking-tight">Braden Scale Pro</h1>
-                <p className="hidden sm:block text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em]">
-                  Medical Risk Assessment Tool
+                <h1 className="text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
+                  Braden Scale Pro
+                  {isComplete && <Activity className={cn("w-5 h-5 animate-bounce", currentRisk?.color)} />}
+                </h1>
+                <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.3em]">
+                  Diagnostic Decision Support
                 </p>
               </div>
             </div>
-            <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground font-medium bg-muted px-3 py-1.5 rounded-full">
-              <Info className="w-4 h-4 text-teal-600" />
-              <span>Standard Clinical Instrument</span>
+            <div className="hidden lg:flex items-center gap-3 text-xs text-muted-foreground font-black bg-muted/50 px-5 py-2.5 rounded-full border border-border/50">
+              <Info className="w-4 h-4 text-primary" />
+              <span>VALIDATED CLINICAL INSTRUMENT</span>
             </div>
           </div>
         </div>
       </header>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
-        <div className="mb-12">
+      <main 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 lg:py-24"
+        aria-live="assertive"
+      >
+        <div className="mb-16">
           <PatientInfoForm
             patientInfo={patientInfo}
             onUpdate={updateField}
           />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
-          <div className="lg:col-span-8 space-y-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-start">
+          <div className="lg:col-span-8 space-y-24">
             {BRADEN_CATEGORIES.map((category, index) => (
               <section
                 key={category.id}
-                className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both"
+                style={{ animationDelay: `${index * 150}ms` }}
               >
-                <div className="mb-8">
-                  <div className="flex items-center gap-4 mb-3">
-                    <span className="flex items-center justify-center w-10 h-10 rounded-2xl bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/20">
+                <div className="mb-10">
+                  <div className="flex items-center gap-6 mb-4">
+                    <span className="flex items-center justify-center w-12 h-12 rounded-[20px] bg-foreground text-background font-black text-xl shadow-2xl">
                       {index + 1}
                     </span>
-                    <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground leading-tight">
+                    <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
                       {category.title}
                     </h2>
                   </div>
-                  <p className="text-muted-foreground ml-14 text-lg leading-relaxed max-w-2xl">
+                  <p className="text-muted-foreground ml-2 text-xl font-medium leading-relaxed max-w-2xl opacity-80">
                     {category.description}
                   </p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 ml-0 lg:ml-14">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {category.options.map((option) => (
                     <SelectableCard
                       key={option.value}
@@ -175,7 +192,7 @@ export function HomePage() {
               </section>
             ))}
           </div>
-          <aside className="lg:col-span-4 lg:sticky lg:top-28">
+          <aside className="lg:col-span-4 lg:sticky lg:top-32 h-fit">
             <ScoreDisplay
               scores={scores}
               patientInfo={patientInfo}
@@ -186,15 +203,21 @@ export function HomePage() {
           </aside>
         </div>
       </main>
-      <footer className="hidden lg:block border-t mt-20 py-12 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-muted-foreground text-sm leading-relaxed max-w-lg mx-auto">
-            © {new Date().getFullYear()} Braden Scale Pro. Designed for healthcare professionals.
-            This tool is intended for clinical decision support only.
+      <footer className="border-t mt-32 py-20 bg-muted/10 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <div className="flex justify-center mb-8">
+            <div className="w-12 h-1 px-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+          </div>
+          <p className="text-muted-foreground text-sm font-black tracking-widest uppercase opacity-60 mb-4">
+            Clinical Safety Disclaimer
+          </p>
+          <p className="text-muted-foreground/60 text-xs leading-relaxed max-w-2xl mx-auto font-medium">
+            © {new Date().getFullYear()} Braden Scale Pro. This software is designed for professional use by trained healthcare personnel.
+            All assessment results should be clinically validated and integrated into the patient's comprehensive nursing care plan.
           </p>
         </div>
       </footer>
-      <Toaster position="top-center" richColors closeButton />
+      <Toaster position="top-center" richColors closeButton expand={true} />
     </div>
   );
 }

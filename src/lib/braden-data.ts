@@ -76,40 +76,87 @@ export const BRADEN_CATEGORIES: BradenCategory[] = [
     ],
   },
 ];
+export const getScoreColor = (value: number) => {
+  switch (value) {
+    case 1:
+      return {
+        border: "border-red-500/80 dark:border-red-500/60",
+        bg: "bg-red-50/60 dark:bg-red-950/40",
+        text: "text-red-700 dark:text-red-300",
+        hover: "hover:border-red-300 dark:hover:border-red-700",
+        accent: "bg-red-600"
+      };
+    case 2:
+      return {
+        border: "border-orange-400/80 dark:border-orange-400/60",
+        bg: "bg-orange-50/60 dark:bg-orange-950/40",
+        text: "text-orange-700 dark:text-orange-300",
+        hover: "hover:border-orange-300 dark:hover:border-orange-700",
+        accent: "bg-orange-600"
+      };
+    case 3:
+      return {
+        border: "border-amber-400/80 dark:border-amber-400/60",
+        bg: "bg-amber-50/60 dark:bg-amber-950/40",
+        text: "text-amber-700 dark:text-amber-300",
+        hover: "hover:border-amber-300 dark:hover:border-amber-700",
+        accent: "bg-amber-600"
+      };
+    case 4:
+    default:
+      return {
+        border: "border-emerald-500/80 dark:border-emerald-500/60",
+        bg: "bg-emerald-50/60 dark:bg-emerald-950/40",
+        text: "text-emerald-700 dark:text-emerald-300",
+        hover: "hover:border-emerald-300 dark:hover:border-emerald-700",
+        accent: "bg-emerald-600"
+      };
+  }
+};
 export const calculateRiskLevel = (score: number) => {
   if (score <= 9) return {
     label: "Severe Risk",
     color: "text-red-600 dark:text-red-400",
-    bg: "bg-red-50 dark:bg-red-950/20",
-    border: "border-red-200 dark:border-red-900/50",
+    bg: "bg-red-100/98 dark:bg-red-950/60",
+    border: "border-red-300 dark:border-red-900",
+    glow: "drop-shadow-[0_0_30px_rgba(220,38,38,0.7)]",
+    ariaLabel: "Severe pressure ulcer risk. Score 9 or less. Requires immediate intensive intervention.",
     action: "Immediate intensive intervention and pressure-relief strategy required."
   };
   if (score <= 12) return {
     label: "High Risk",
     color: "text-orange-600 dark:text-orange-400",
-    bg: "bg-orange-50 dark:bg-orange-950/20",
-    border: "border-orange-200 dark:border-orange-900/50",
+    bg: "bg-orange-100/98 dark:bg-orange-950/60",
+    border: "border-orange-300 dark:border-orange-900",
+    glow: "drop-shadow-[0_0_30px_rgba(234,88,12,0.6)]",
+    ariaLabel: "High pressure ulcer risk. Score 10 to 12. Strict turning schedule and pressure-reducing surface mandatory.",
     action: "Strict turning schedule and pressure-reducing surface mandatory."
   };
   if (score <= 14) return {
     label: "Moderate Risk",
     color: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-50 dark:bg-amber-950/20",
-    border: "border-amber-200 dark:border-amber-900/50",
+    bg: "bg-amber-50/98 dark:bg-amber-950/60",
+    border: "border-amber-300 dark:border-amber-900",
+    glow: "drop-shadow-[0_0_30px_rgba(217,119,6,0.5)]",
+    ariaLabel: "Moderate pressure ulcer risk. Score 13 to 14. Increase monitoring and adjunct devices.",
     action: "Increase monitoring and consider adjunct pressure-relief devices."
   };
   if (score <= 18) return {
     label: "Mild Risk",
     color: "text-yellow-600 dark:text-yellow-400",
-    bg: "bg-yellow-50 dark:bg-yellow-950/20",
-    border: "border-yellow-200 dark:border-yellow-900/50",
+    bg: "bg-yellow-50/98 dark:bg-yellow-950/60",
+    border: "border-yellow-300 dark:border-yellow-900",
+    glow: "drop-shadow-[0_0_30px_rgba(202,138,4,0.4)]",
+    ariaLabel: "Mild pressure ulcer risk. Score 15 to 18. Maintain skin hygiene and regular reassessment.",
     action: "Maintain skin hygiene and reassess on defined regular intervals."
   };
   return {
     label: "No Risk",
     color: "text-emerald-600 dark:text-emerald-400",
-    bg: "bg-emerald-50 dark:bg-emerald-950/20",
-    border: "border-emerald-200 dark:border-emerald-900/50",
+    bg: "bg-emerald-50/98 dark:bg-emerald-950/60",
+    border: "border-emerald-300 dark:border-emerald-900",
+    glow: "drop-shadow-[0_0_30px_rgba(5,150,105,0.4)]",
+    ariaLabel: "No apparent pressure ulcer risk. Score 19 to 23. Standard care and periodic reassessment.",
     action: "Reassess if patient's clinical status changes significantly."
   };
 };
