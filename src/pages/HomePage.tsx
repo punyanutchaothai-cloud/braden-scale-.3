@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { BRADEN_CATEGORIES, calculateRiskLevel } from '@/lib/braden-data';
 import { SelectableCard } from '@/components/SelectableCard';
 import { ScoreDisplay } from '@/components/ScoreDisplay';
@@ -22,52 +22,74 @@ export function HomePage() {
   const [scores, setScores] = useState<Record<string, number | null>>({
     sensory: null, moisture: null, activity: null, mobility: null, nutrition: null, friction: null,
   });
-  const answeredCount = Object.values(scores).filter((v) => v !== null).length;
+  const answeredCount = useMemo(() => 
+    Object.values(scores).filter((v) => v !== null).length, 
+  [scores]);
   const isComplete = answeredCount === 6;
-  const totalScore = Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0);
-  const currentRisk = isComplete ? calculateRiskLevel(totalScore, parseInt(patientInfo.age)) : null;
-  const handleSelect = (categoryId: string, value: number) => {
+  const totalScore = useMemo(() => 
+    Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0),
+  [scores]);
+  const currentRisk = useMemo(() => 
+    isComplete ? calculateRiskLevel(totalScore, parseInt(patientInfo.age)) : null,
+  [isComplete, totalScore, patientInfo.age]);
+  const handleSelect = useCallback((categoryId: string, value: number) => {
     setScores(prev => ({ ...prev, [categoryId]: value }));
-  };
-  const handleReset = () => {
+  }, []);
+  const handleReset = useCallback(() => {
     setScores({ sensory: null, moisture: null, activity: null, mobility: null, nutrition: null, friction: null });
     resetPatientInfo();
     toast.info("ล้างข้อมูลเรียบร้อยแล้ว");
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, [resetPatientInfo]);
   const handleCopySummary = useCallback(() => {
-    if (!isComplete || !currentRisk) return;
-    const baseDate = patientInfo.date && patientInfo.time 
-      ? new Date(`${patientInfo.date}T${patientInfo.time}`) 
+    if (!isComplete || !currentRisk) {
+      toast.error("กรุณาทำแบบประเมินให้ครบถ้วนก่อนคัดลอก");
+      return;
+    }
+    if (!isPatientValid) {
+      toast.warning("ข้อมูลผู้ป่วยไม่ครบถ้วน (ชื่อ, HN หรือ อายุ)");
+    }
+    const baseDate = patientInfo.date && patientInfo.time
+      ? new Date(`${patientInfo.date}T${patientInfo.time}`)
       : new Date();
     const nextTime = new Date(baseDate.getTime() + (currentRisk.nextIntervalHours * 3600000));
-    const formatter = new Intl.DateTimeFormat('th-TH', { 
-      day: 'numeric', 
-      month: 'short', 
-      year: 'numeric', 
-      hour: 'numeric', 
-      minute: '2-digit' 
+    const formatter = new Intl.DateTimeFormat('th-TH', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
     });
     const nextText = formatter.format(nextTime);
     const ageNum = parseInt(patientInfo.age || '0', 10);
-    const showNext = patientInfo.age && ageNum > 5;
-    let summaryText = `[BRADEN ASSESSMENT]\nDate: ${patientInfo.date} ${patientInfo.time}\nPatient: ${patientInfo.name} (${patientInfo.hn})\nHN: ${patientInfo.hn}\nAge: ${patientInfo.age} ปี\nScore: ${totalScore}/23\nRisk: ${currentRisk.label}\nDX: ${currentRisk.dx}`;
-    if (showNext) {
-      summaryText += `\n🕒 ประเมินครั้งต่อไป: ${nextText} (${currentRisk.nextIntervalText})`;
+    const isAdult = ageNum > 5;
+    let summaryText = `[สรุปผลประเมิน BRADEN SCALE]\n`;
+    summaryText += `ผู้ป่วย: ${patientInfo.name || '-'}\n`;
+    summaryText += `HN: ${patientInfo.hn || '-'}\n`;
+    summaryText += `หอผู้ป่วย/เตียง: ${patientInfo.bed || '-'}\n`;
+    summaryText += `อายุ: ${patientInfo.age || '-'} ปี\n`;
+    summaryText += `----------------------------\n`;
+    summaryText += `วันที่ประเมิน: ${patientInfo.date} เวลา ${patientInfo.time} น.\n`;
+    summaryText += `คะแนนรวม: ${totalScore}/23 คะแนน\n`;
+    summaryText += `ระดับความเสี่ยง: ${currentRisk.label}\n`;
+    summaryText += `การวินิจฉัยทางการพยาบาล: ${currentRisk.dx}\n`;
+    if (isAdult) {
+      summaryText += `----------------------------\n`;
+      summaryText += `🕒 ประเมินครั้งต่อไป: ${nextText} (${currentRisk.nextIntervalText})`;
     }
     navigator.clipboard.writeText(summaryText);
-    toast.success("คัดลอกสรุปเรียบร้อยแล้ว");
-  }, [isComplete, patientInfo, totalScore, currentRisk]);
+    toast.success("คัดลอกสรุปสำหรับบันทึกทางการพยาบาลแล้ว");
+  }, [isComplete, isPatientValid, patientInfo, totalScore, currentRisk]);
   return (
     <div className={cn(
-      "min-h-screen transition-all duration-1000 ease-out pb-64 lg:pb-24",
+      "min-h-screen transition-all duration-1000 ease-out pb-80 lg:pb-24",
       isComplete ? currentRisk?.bg : "bg-slate-50 dark:bg-slate-950"
     )}>
       <div className="bg-slate-900 border-b border-slate-800 relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <button onClick={() => setShowLogic(!showLogic)} className="py-3 text-slate-400 hover:text-white text-[10px] font-mono font-bold tracking-wider flex items-center gap-3">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            CLINICAL ENGINE v2.0
+            CLINICAL ENGINE v2.1
           </button>
           <div className="flex items-center gap-4">
             <Authenticated>

@@ -19,44 +19,61 @@ interface ScoreDisplayProps {
 }
 export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPatientValid }: ScoreDisplayProps) {
   const isMobile = useIsMobile();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { isAuthenticated } = useConvexAuth();
   const saveAssessment = useMutation(api.assessments.saveAssessment);
+  // Sync expanded state with device type initially, but allow toggle
   useEffect(() => {
-    if (isMobile) setIsExpanded(false);
-    else setIsExpanded(true);
+    if (!isMobile) {
+      setIsExpanded(true);
+    }
   }, [isMobile]);
-  const answeredCount = Object.values(scores).filter((v) => v !== null).length;
+  const answeredCount = useMemo(() => Object.values(scores).filter((v) => v !== null).length, [scores]);
   const isComplete = answeredCount === 6;
-  const totalScore = Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0);
-  const risk = calculateRiskLevel(totalScore, patientInfo.age ? parseInt(patientInfo.age) : undefined);
+  const totalScore = useMemo(() => Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0), [scores]);
+  const risk = useMemo(() => 
+    calculateRiskLevel(totalScore, patientInfo.age ? parseInt(patientInfo.age) : undefined),
+  [totalScore, patientInfo.age]);
   const completionPercentage = (answeredCount / 6) * 100;
   const nextAssessmentData = useMemo(() => {
-    if (!isComplete) return null;
-    const baseDate = patientInfo.date && patientInfo.time 
-      ? new Date(`${patientInfo.date}T${patientInfo.time}`) 
-      : new Date();
+    if (!isComplete || !patientInfo.age || parseInt(patientInfo.age) <= 5) return null;
+    // Ensure we have a valid base date from form or fallback to now
+    let baseDate: Date;
+    try {
+      if (patientInfo.date && patientInfo.time) {
+        baseDate = new Date(`${patientInfo.date}T${patientInfo.time}`);
+        if (isNaN(baseDate.getTime())) baseDate = new Date();
+      } else {
+        baseDate = new Date();
+      }
+    } catch {
+      baseDate = new Date();
+    }
     const nextDate = new Date(baseDate.getTime() + (risk.nextIntervalHours * 3600000));
-    const formatter = new Intl.DateTimeFormat('th-TH', { 
-      day: 'numeric', 
-      month: 'short', 
-      year: 'numeric', 
-      hour: 'numeric', 
-      minute: '2-digit' 
+    const formatter = new Intl.DateTimeFormat('th-TH', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
     });
-    const formatted = formatter.format(nextDate);
-    // Debug for transparency
-    console.log(`Braden Engine: Total Score ${totalScore}, Next Interval ${risk.nextIntervalHours}h, Date: ${formatted}`);
-    return { formatted, text: risk.nextIntervalText };
-  }, [isComplete, patientInfo.date, patientInfo.time, risk.nextIntervalHours, risk.nextIntervalText, totalScore]);
+    return { 
+      formatted: formatter.format(nextDate), 
+      text: risk.nextIntervalText 
+    };
+  }, [isComplete, patientInfo.date, patientInfo.time, patientInfo.age, risk.nextIntervalHours, risk.nextIntervalText]);
   const handleCloudSave = async () => {
     if (!isAuthenticated) {
       toast.error("กรุณาเข้าสู่ระบบเพื่อบันทึกข้อมูลลงคลาวด์");
       return;
     }
+    if (!isComplete) {
+      toast.error("กรุณาทำแบบประเมินให้ครบถ้วนก่อนบันทึก");
+      return;
+    }
     if (!isPatientValid) {
-      toast.error("ข้อมูลผู้ป่วยไม่ครบถ้วน");
+      toast.error("ข้อมูลผู้ป่วยไม่ครบถ้วน (ชื่อ, HN หรือ อายุ)");
       return;
     }
     setIsSaving(true);
@@ -77,7 +94,7 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
       toast.success("บันทึกข้อมูลลงคลาวด์เรียบร้อยแล้ว");
     } catch (e) {
       toast.error("ไม่สามารถบันทึกข้อมูลได้");
-      console.error(e);
+      console.error("[Clinical Save Error]", e);
     } finally {
       setIsSaving(false);
     }
@@ -92,9 +109,14 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
         {isMobile && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full h-8 flex items-center justify-center border-b border-border/10 hover:bg-muted/20 transition-colors"
+            className="w-full h-10 flex items-center justify-center border-b border-border/10 hover:bg-muted/20 transition-colors"
           >
-            {isExpanded ? <ChevronDown className="w-5 h-5 text-muted-foreground" /> : <ChevronUp className="w-5 h-5 text-muted-foreground" />}
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[8px] font-black uppercase text-muted-foreground">
+                {isExpanded ? "ย่อหน้าจอ" : "แตะเพื่อดูรายละเอียด"}
+              </span>
+              {isExpanded ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronUp className="w-4 h-4 text-muted-foreground" />}
+            </div>
           </button>
         )}
         <CardContent className="p-4 md:p-8 backdrop-blur-3xl relative">
@@ -110,21 +132,22 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                       {risk.label}
                     </div>
                   )}
-                  <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">BRADEN STATUS</p>
+                  <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Braden Assessment</p>
                 </div>
               </div>
             </div>
             <AnimatePresence>
               {isExpanded && (
                 <motion.div
-                  initial={isMobile ? { height: 0, opacity: 0 } : false}
+                  initial={isMobile ? { height: 0, opacity: 0 } : { opacity: 1 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   className="overflow-hidden space-y-4"
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Progress</span>
+                      <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">หัวข้อที่ประเมินแล้ว</span>
                       <span className="text-[9px] font-black text-teal-600">{answeredCount} / 6</span>
                     </div>
                     <Progress value={completionPercentage} className="h-2 bg-muted rounded-full" />
@@ -134,10 +157,10 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                       <div className="space-y-3">
                         <div>
                           <p className="text-[9px] font-black text-muted-foreground uppercase mb-0.5">วินิจฉัยทางการพยาบาล:</p>
-                          <p className="text-xs font-black text-foreground">{risk.dx}</p>
+                          <p className="text-xs font-black text-foreground leading-tight">{risk.dx}</p>
                         </div>
                         <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
-                          <p className="text-[9px] font-black text-muted-foreground uppercase">แผนการดูแล:</p>
+                          <p className="text-[9px] font-black text-muted-foreground uppercase">แผนการดูแลเบื้องต้น:</p>
                           <ul className="space-y-1.5">
                             {risk.care.map((item, idx) => (
                               <li key={idx} className="flex items-start gap-2 text-[11px] font-medium text-foreground/90 leading-tight">
@@ -151,22 +174,22 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                     </div>
                   )}
                   {isComplete && !isChild && nextAssessmentData && (
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.95, y: 10 }} 
-                      animate={{ opacity: 1, scale: 1, y: 0 }} 
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
                       className={cn(
-                        "mt-4 p-6 bg-gradient-to-r from-muted/80 to-background/50 rounded-3xl border-t-4 shadow-2xl border-l-8 backdrop-blur-xl",
+                        "mt-4 p-5 bg-gradient-to-r from-muted/80 to-background/50 rounded-2xl border-t-4 shadow-xl border-l-8 backdrop-blur-xl",
                         risk.border
                       )}
                     >
                       <div className="flex items-center gap-3 mb-2">
-                        <Clock className={cn("w-6 h-6", risk.color)} />
-                        <h4 className={cn("font-black text-lg", risk.color)}>ประเมินครั้งต่อไป</h4>
+                        <Clock className={cn("w-5 h-5", risk.color)} />
+                        <h4 className={cn("font-black text-sm", risk.color)}>นัดประเมินครั้งต่อไป</h4>
                       </div>
-                      <p className="text-2xl font-display font-bold text-foreground mb-1 leading-tight">
+                      <p className="text-xl font-display font-bold text-foreground mb-1 leading-tight">
                         {nextAssessmentData.formatted}
                       </p>
-                      <p className={cn("font-bold text-sm uppercase tracking-wider", risk.color)}>
+                      <p className={cn("font-bold text-[10px] uppercase tracking-wider opacity-80", risk.color)}>
                         ({nextAssessmentData.text})
                       </p>
                     </motion.div>
@@ -186,7 +209,7 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                 )}
               >
                 {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CloudUpload className="w-3.5 h-3.5" />}
-                <span>{isMobile && !isExpanded ? "" : "บันทึกลงคลาวด์"}</span>
+                <span>{isMobile && !isExpanded ? "" : "บันทึกข้อมูล"}</span>
               </button>
               <button
                 onClick={onCopySummary}
@@ -196,7 +219,7 @@ export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPa
                   isComplete ? "bg-teal-600 text-white border-teal-500 shadow-md hover:bg-teal-700" : "bg-muted text-muted-foreground cursor-not-allowed"
                 )}
               >
-                <Clipboard className="w-3.5 h-3.5" /> <span>{isMobile && !isExpanded ? "" : "คัดลอกสรุป"}</span>
+                <Clipboard className="w-3.5 h-3.5" /> <span>{isMobile && !isExpanded ? "" : "สรุปพยาบาล"}</span>
               </button>
               <button
                 onClick={onReset}

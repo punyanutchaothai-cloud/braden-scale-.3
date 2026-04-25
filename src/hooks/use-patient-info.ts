@@ -53,12 +53,22 @@ export function usePatientInfo() {
       console.warn("Failed to remove item from localStorage", e);
     }
   }, []);
+  // Age based logic for clinical engine exclusion
+  const isPediatricExclusion = useMemo(() => {
+    const ageNum = parseInt(patientInfo.age);
+    return !isNaN(ageNum) && ageNum <= 5;
+  }, [patientInfo.age]);
   const isAgeValid = useMemo(() => {
     const ageNum = parseInt(patientInfo.age);
-    return !isNaN(ageNum) && ageNum > 5;
+    return !isNaN(ageNum) && ageNum > 0;
   }, [patientInfo.age]);
+  // Comprehensive record validation
   const isPatientValid = useMemo(() => {
-    return patientInfo.name.trim() !== '' && patientInfo.hn.trim() !== '' && isAgeValid;
+    return (
+      patientInfo.name.trim() !== '' && 
+      patientInfo.hn.trim() !== '' && 
+      isAgeValid
+    );
   }, [patientInfo.name, patientInfo.hn, isAgeValid]);
   return {
     patientInfo,
@@ -66,5 +76,6 @@ export function usePatientInfo() {
     resetPatientInfo,
     isPatientValid,
     isAgeValid,
+    isPediatricExclusion
   };
 }
