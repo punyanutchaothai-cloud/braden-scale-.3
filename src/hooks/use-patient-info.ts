@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 export interface PatientInfo {
   name: string;
   hn: string;
@@ -6,7 +6,7 @@ export interface PatientInfo {
   date: string;
   time: string;
 }
-const STORAGE_KEY = 'braden_patient_info';
+const STORAGE_KEY = 'braden_pro_patient_v1';
 const getDefaults = (): PatientInfo => {
   const now = new Date();
   return {
@@ -19,34 +19,45 @@ const getDefaults = (): PatientInfo => {
 };
 export function usePatientInfo() {
   const [patientInfo, setPatientInfo] = useState<PatientInfo>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Failed to parse patient info", e);
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        return { ...getDefaults(), ...JSON.parse(saved) };
       }
+    } catch (e) {
+      console.error("Failed to parse patient info from localStorage", e);
     }
     return getDefaults();
   });
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(patientInfo));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(patientInfo));
+    } catch (e) {
+      console.error("Failed to save patient info to localStorage", e);
+    }
   }, [patientInfo]);
-  const updateField = (field: keyof PatientInfo, value: string) => {
-    setPatientInfo((prev) => ({ ...prev, [field]: value }));
-  };
-  const resetPatientInfo = () => {
+  const updateField = useCallback((field: keyof PatientInfo, value: string) => {
+    setPatientInfo((prev) => {
+      if (prev[field] === value) return prev;
+      return { ...prev, [field]: value };
+    });
+  }, []);
+  const resetPatientInfo = useCallback(() => {
     const defaults = getDefaults();
     setPatientInfo(defaults);
-    localStorage.removeItem(STORAGE_KEY);
-  };
-  const isValid = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.warn("Failed to remove item from localStorage", e);
+    }
+  }, []);
+  const isPatientValid = useMemo(() => {
     return patientInfo.name.trim() !== '' && patientInfo.hn.trim() !== '';
-  };
+  }, [patientInfo.name, patientInfo.hn]);
   return {
     patientInfo,
     updateField,
     resetPatientInfo,
-    isValid,
+    isPatientValid,
   };
 }
