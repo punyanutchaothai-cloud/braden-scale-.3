@@ -1,252 +1,71 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { calculateRiskLevel } from '@/lib/braden-data';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, RotateCcw, Clipboard, CloudUpload, Loader2, ChevronUp, ChevronDown, Clock } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
-import { PatientInfo } from '@/hooks/use-patient-info';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useMutation, useConvexAuth } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import { toast } from 'sonner';
+import { AlertCircle, CheckCircle, Info } from 'lucide-react';
 interface ScoreDisplayProps {
   scores: Record<string, number | null>;
-  patientInfo: PatientInfo;
   onReset: () => void;
-  onCopySummary: () => void;
-  isPatientValid: boolean;
 }
-export function ScoreDisplay({ scores, patientInfo, onReset, onCopySummary, isPatientValid }: ScoreDisplayProps) {
-  const isMobile = useIsMobile();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const { isAuthenticated } = useConvexAuth();
-  const saveAssessment = useMutation(api.assessments.saveAssessment);
-  useEffect(() => {
-    if (!isMobile) {
-      setIsExpanded(true);
-    }
-  }, [isMobile]);
-  const answeredCount = useMemo(() => Object.values(scores).filter((v) => v !== null).length, [scores]);
+export function ScoreDisplay({ scores, onReset }: ScoreDisplayProps) {
+  const answeredCount = Object.values(scores).filter((v) => v !== null).length;
   const isComplete = answeredCount === 6;
-  const totalScore = useMemo(() => Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0), [scores]);
-  const parsedAge = useMemo(() => {
-    const ageVal = parseInt(patientInfo.age);
-    return isNaN(ageVal) ? undefined : ageVal;
-  }, [patientInfo.age]);
-  const risk = useMemo(() => calculateRiskLevel(totalScore, parsedAge), [totalScore, parsedAge]);
-  const completionPercentage = (answeredCount / 6) * 100;
-  const isChild = parsedAge !== undefined && parsedAge <= 5;
-  const nextAssessmentData = useMemo(() => {
-    if (!isComplete || isChild) return null;
-    let baseDate: Date;
-    try {
-      if (patientInfo.date && patientInfo.time) {
-        baseDate = new Date(`${patientInfo.date}T${patientInfo.time}`);
-        if (isNaN(baseDate.getTime())) baseDate = new Date();
-      } else {
-        baseDate = new Date();
-      }
-    } catch {
-      baseDate = new Date();
-    }
-    const nextDate = new Date(baseDate.getTime() + (risk.nextIntervalHours * 3600000));
-    // Safety check for invalid date calculations
-    if (isNaN(nextDate.getTime())) return null;
-    const formatter = new Intl.DateTimeFormat('th-TH', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit'
-    });
-    return {
-      formatted: formatter.format(nextDate),
-      text: risk.nextIntervalText,
-      frequency: risk.assess_frequency
-    };
-  }, [isComplete, patientInfo.date, patientInfo.time, isChild, risk.nextIntervalHours, risk.nextIntervalText, risk.assess_frequency]);
-  const handleCloudSave = async () => {
-    if (!isAuthenticated) {
-      toast.error("กรุณาเข้าสู่ระบบเพื่อบันทึกข้อมูลลงคลาวด์");
-      return;
-    }
-    if (!isComplete) {
-      toast.error("กรุณาทำแบบประเมินให้ครบถ้วนก่อนบันทึก");
-      return;
-    }
-    if (!isPatientValid) {
-      toast.error("ข้อมูลผู้ป่วยไม่ครบถ้วน (ชื่อ, HN หรือ อายุ)");
-      return;
-    }
-    setIsSaving(true);
-    try {
-      await saveAssessment({
-        patientName: patientInfo.name,
-        patientHN: patientInfo.hn,
-        patientAge: parsedAge ?? 0,
-        assessmentDate: patientInfo.date,
-        assessmentTime: patientInfo.time,
-        scores: scores as any,
-        totalScore,
-        riskLevel: risk.label,
-        diagnosis: risk.dx,
-        carePlan: risk.care,
-        nextAssessment: risk.nextIntervalText,
-      });
-      toast.success("บันทึกข้อมูลลงคลาวด์เรียบร้อยแล้ว");
-    } catch (e) {
-      toast.error("ไม่สามารถบันทึกข้อมูลได้");
-      console.error("[Clinical Save Error]", e);
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const totalScore = Object.values(scores).reduce((acc: number, curr) => acc + (curr ?? 0), 0);
+  const risk = calculateRiskLevel(totalScore);
+  const containerClasses = "w-full lg:sticky lg:top-8 transition-all duration-300";
+  const mobileWrapperClasses = "fixed bottom-0 left-0 right-0 z-50 lg:relative lg:bottom-auto lg:z-0";
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 lg:relative lg:bottom-auto lg:z-0 lg:block p-0 sm:p-4 lg:p-0 pb-safe" aria-live="polite">
-      <div className={cn(
-        "absolute inset-0 bg-background/40 backdrop-blur-md lg:hidden transition-opacity duration-300",
-        isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
-      )} onClick={() => setIsExpanded(false)} />
+    <div className={mobileWrapperClasses}>
       <Card className={cn(
-        "relative rounded-none sm:rounded-3xl border-t sm:border-2 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition-all duration-500 ease-in-out overflow-hidden",
-        isComplete ? cn(risk.bg, risk.border) : "bg-card/95 border-border"
+        "rounded-none lg:rounded-xl border-t-4 border-x-0 border-b-0 lg:border-t lg:border-x lg:border-b shadow-2xl lg:shadow-soft",
+        isComplete ? `lg:border-t-8 border-t-teal-600` : "lg:border-t-8 border-t-slate-200"
       )}>
-        {isMobile && (
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full h-12 flex items-center justify-center border-b border-border/10 hover:bg-muted/20 transition-colors"
-          >
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">
-                {isExpanded ? "ย่อหน้าจอรายละเอียด" : "แตะเพื่อดูรายละเอียดผลลัพธ์"}
-              </span>
-              {isExpanded ? <ChevronDown className="w-5 h-5 text-muted-foreground animate-bounce" /> : <ChevronUp className="w-5 h-5 text-muted-foreground animate-bounce" />}
-            </div>
-          </button>
-        )}
-        <CardContent className="p-4 md:p-8 backdrop-blur-3xl">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className={cn(
-                  "text-4xl md:text-6xl font-display font-black tracking-tighter transition-all duration-1000", 
-                  isComplete && !isChild ? cn("text-foreground", risk.glow) : "text-muted-foreground/20"
-                )}>
-                  {isComplete && !isChild ? totalScore : "--"}
+        <CardContent className="p-4 md:p-6 bg-white/95 backdrop-blur-md">
+          <div className="flex lg:flex-col items-center lg:items-start justify-between gap-4">
+            <div className="flex-1 lg:w-full">
+              <div className="flex items-center gap-2 mb-1 lg:mb-2">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                  Assessment Progress
+                </span>
+                <span className="text-xs font-bold text-teal-600">
+                  {answeredCount}/6
+                </span>
+              </div>
+              <div className="flex items-end gap-3">
+                <div className="text-4xl md:text-5xl font-display font-black text-slate-900">
+                  {isComplete ? totalScore : <span className="text-slate-300">--</span>}
                 </div>
-                <div className="flex flex-col">
-                  {isComplete && (
-                    <div className={cn("px-2 py-0.5 rounded-full text-[10px] font-black border shadow-sm uppercase mb-1 bg-white/80 dark:bg-black/40", risk.color, risk.border)}>
-                      {risk.label}
-                    </div>
-                  )}
-                  <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Braden Assessment</p>
-                </div>
+                {isComplete && (
+                  <div className={cn("text-lg font-bold pb-1", risk.color)}>
+                    {risk.label}
+                  </div>
+                )}
               </div>
             </div>
-            <AnimatePresence initial={false}>
-              {isExpanded && (
-                <motion.div
-                  initial={isMobile ? { height: 0, opacity: 0 } : { opacity: 1 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="overflow-hidden space-y-4"
-                >
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">ความครบถ้วน</span>
-                      <span className="text-[9px] font-black text-teal-600">{answeredCount} / 6 หัวข้อ</span>
-                    </div>
-                    <Progress value={completionPercentage} className="h-2 bg-muted rounded-full" />
-                  </div>
-                  {isComplete && (
-                    <div className={cn("p-4 rounded-xl border-l-[4px] shadow-md bg-white/60 dark:bg-black/60", risk.border)}>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-[9px] font-black text-muted-foreground uppercase mb-0.5">วินิจฉัยทางการพยาบาล:</p>
-                          <p className="text-xs font-black text-foreground leading-tight">{risk.dx}</p>
-                        </div>
-                        <div className="space-y-2 max-h-40 lg:max-h-32 overflow-y-auto pr-1">
-                          <p className="text-[9px] font-black text-muted-foreground uppercase">แผนการดูแล:</p>
-                          <ul className="space-y-1.5">
-                            {risk.care.map((item, idx) => (
-                              <li key={idx} className="flex items-start gap-2 text-[11px] font-medium text-foreground/90 leading-tight">
-                                <CheckCircle2 className={cn("w-3.5 h-3.5 mt-0.5 flex-shrink-0", risk.color)} />
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {isComplete && !isChild && nextAssessmentData && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      className={cn(
-                        "mt-2 p-4 bg-gradient-to-r from-muted/80 to-background/50 rounded-2xl border-t-4 shadow-lg border-l-8 backdrop-blur-xl",
-                        risk.border
-                      )}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Clock className={cn("w-4 h-4", risk.color)} />
-                          <h4 className={cn("font-black text-xs", risk.color)}>ประเมินครั้งถัดไป</h4>
-                        </div>
-                        <span className={cn("px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-white/60 shadow-sm border", risk.color, risk.border)}>
-                          {nextAssessmentData.frequency}
-                        </span>
-                      </div>
-                      <p className="text-lg font-display font-bold text-foreground mb-0.5 leading-tight">
-                        {nextAssessmentData.formatted}
-                      </p>
-                      <p className={cn("font-bold text-[9px] uppercase tracking-wider opacity-80", risk.color)}>
-                        ({nextAssessmentData.text})
-                      </p>
-                    </motion.div>
-                  )}
-                </motion.div>
+            <div className="flex flex-col gap-2 w-auto lg:w-full">
+              {isComplete ? (
+                <div className={cn("hidden lg:flex items-center gap-2 p-3 rounded-lg border text-sm", risk.bg, risk.border, risk.color)}>
+                  <Info className="w-4 h-4 flex-shrink-0" />
+                  <span>Recommendation based on {risk.label} status.</span>
+                </div>
+              ) : (
+                <div className="hidden lg:flex items-center gap-2 p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 text-sm">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>Please complete all 6 categories.</span>
+                </div>
               )}
-            </AnimatePresence>
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={handleCloudSave}
-                disabled={!isComplete || isSaving}
-                className={cn(
-                  "flex-1 btn rounded-lg text-[10px] font-black py-4 flex gap-2 items-center justify-center border-2 transition-all",
-                  isComplete
-                    ? "bg-slate-900 text-white border-slate-800 shadow-md hover:bg-slate-800"
-                    : "bg-muted text-muted-foreground cursor-not-allowed"
-                )}
-              >
-                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CloudUpload className="w-4 h-4" />}
-                <span className="hidden sm:inline">บันทึกคลาวด์</span>
-              </button>
-              <button
-                onClick={onCopySummary}
-                disabled={!isComplete}
-                className={cn(
-                  "flex-1 btn rounded-lg text-[10px] font-black py-4 flex gap-2 items-center justify-center border-2 transition-all",
-                  isComplete ? "bg-teal-600 text-white border-teal-500 shadow-md hover:bg-teal-700" : "bg-muted text-muted-foreground cursor-not-allowed"
-                )}
-              >
-                <Clipboard className="w-4 h-4" /> <span className="hidden sm:inline">คัดลอกสรุป</span>
-              </button>
               <button
                 onClick={onReset}
-                className="px-4 bg-background hover:bg-muted text-muted-foreground rounded-lg text-[10px] font-black py-4 border-2 border-border/50 transition-colors"
-                title="ล้างข้อมูล"
+                className="btn border border-slate-200 hover:bg-slate-50 text-slate-600 lg:w-full rounded-lg transition-colors text-sm py-2"
               >
-                <RotateCcw className="w-4 h-4" />
+                Reset Assessment
               </button>
             </div>
           </div>
         </CardContent>
       </Card>
+      {/* Spacer for mobile to prevent content clipping */}
+      <div className="h-4 lg:hidden bg-white" />
     </div>
   );
 }
