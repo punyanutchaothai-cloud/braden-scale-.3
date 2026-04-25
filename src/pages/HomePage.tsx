@@ -3,7 +3,8 @@ import { BRADEN_CATEGORIES, calculateRiskLevel } from '@/lib/braden-data';
 import { SelectableCard } from '@/components/SelectableCard';
 import { ScoreDisplay } from '@/components/ScoreDisplay';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { Toaster, toast } from 'sonner';
+import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import { LogicPreview } from '@/components/LogicPreview';
 import { PatientInfoForm } from '@/components/PatientInfoForm';
 import { usePatientInfo } from '@/hooks/use-patient-info';
@@ -29,11 +30,11 @@ export function HomePage() {
     if (isComplete) {
       if (!isPatientValid) {
         toast.warning("ข้อมูลผู้ป่วยไม่ครบถ้วน", {
-          description: "กรุณาระบุชื่อและเลข HN เพื่อการบันทึกข้อมูลที่สมบูรณ์",
+          description: "กรุณาระบุชื่อและเลข HN เพื่อความสมบูรณ์ของเวชระเบียน",
           id: "validation-warning",
         });
       }
-      toast.success("จัดทำแผนการพยาบาลเสร็จสิ้น", {
+      toast.success("การประเมินเสร็จสมบูรณ์", {
         description: `ระดับความเสี่ยง: ${currentRisk?.label}`,
         duration: 5000,
       });
@@ -87,7 +88,7 @@ export function HomePage() {
     summaryText += `© Braden Scale Pro - ระบบสนับสนุนการตัดสินใจทางคลินิก`;
     navigator.clipboard.writeText(summaryText).then(() => {
       toast.success("คัดลอกแผนการพยาบาลลงคลิปบอร์ดแล้ว", {
-        description: "พร้อมสำหรับการบันทึกในระบบเวชระเบียนอิเล็กทรอนิกส์ (EHR)"
+        description: "พร้อมสำหรับการบันทึกในระบบเวชระเบียน (EHR)"
       });
     }).catch(() => {
       toast.error("เกิดข้อผิดพลาดในการคัดลอก");
@@ -95,7 +96,7 @@ export function HomePage() {
   }, [scores, isComplete, patientInfo, totalScore]);
   return (
     <div className={cn(
-      "min-h-screen transition-all duration-1000 ease-out pb-64 lg:pb-20",
+      "min-h-screen transition-all duration-1000 ease-out pb-80 lg:pb-24",
       isComplete ? currentRisk?.bg : "bg-slate-50 dark:bg-slate-950"
     )}>
       <div className="bg-slate-900 border-b border-slate-800 relative z-50">
@@ -106,7 +107,7 @@ export function HomePage() {
           >
             <div className="flex items-center gap-3">
               <span className="flex h-2 w-2 rounded-full bg-teal-500 animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.8)]" />
-              อัลกอริทึมการคำนวณทางการแพทย์ (Thai Medical Algorithm)
+              Thai Medical Decision Algorithm (Braden Engine)
             </div>
             <div className="flex items-center gap-2">
               {showLogic ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -148,7 +149,7 @@ export function HomePage() {
             </div>
             <div className="hidden lg:flex items-center gap-3 text-xs text-muted-foreground font-black bg-muted/50 px-5 py-2.5 rounded-full border border-border/50">
               <Info className="w-4 h-4 text-primary" />
-              <span>เครื่องมือประเมินและวางแผนการพยาบาลมาตรฐาน</span>
+              <span>มาตรฐานการประเมินแผลกดทับระดับสากล</span>
             </div>
           </div>
         </div>
@@ -210,11 +211,11 @@ export function HomePage() {
       <footer className="border-t mt-32 py-16 bg-muted/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-muted-foreground text-xs font-black tracking-widest uppercase opacity-60 mb-3">
-            ข้อกำหนดและเงื่อนไขการใช้งานทางคลินิก
+            Professional Clinical Support Tool
           </p>
           <p className="text-muted-foreground/60 text-[10px] leading-relaxed max-w-2xl mx-auto font-medium">
-            ซอฟต์แวร์นี้ออกแบบมาเพื่อใช้งานโดยบุคลากรทางการแพทย์ที่ผ่านการฝึกอบรมเท่านั้น
-            แผนการพยาบาลที่แนะนำควรได้รับการตรวจสอบและปรับใช้ตามวิจารณญาณทางวิชาชีพและบริบทของผู้ป่วยเฉพาะราย
+            ซอฟต์แวร์นี้ออกแบบมาเพื่อสนับสนุนการตัดสินใจของบุคลากรทางการแพทย์เท่านั้น
+            แผนการพยาบาลควรได้รับการปรับใช้ตามดุลยพินิจทางวิชาชีพและสภาวะของผู้ป่วยเฉพาะราย
             © {new Date().getFullYear()} Braden Scale Pro.
           </p>
         </div>

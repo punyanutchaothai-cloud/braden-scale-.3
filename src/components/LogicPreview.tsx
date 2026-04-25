@@ -13,12 +13,12 @@ const getRiskLevel = (score: number) => {
   if (score <= 9)  return "เสี่ยงสูงมาก (Severe Risk)";
   if (score <= 12) return "เสี่ยงสูง (High Risk)";
   if (score <= 14) return "เสี่ยงปานกลาง (Moderate Risk)";
-  if (score <= 18) return "เสี่ยงต่ำ (Mild Risk)";
+  if (score <= 18) return "เสี่ยงเล็กน้อย (Mild Risk)";
   return "ไม่มีความเสี่ยง (No Risk)";
 };
 // คะแนนรวม = ผลรวมของหมวดหมู่ทั้ง 6 ด้าน (ต่ำสุด: 6, สูงสุด: 23)
-const total = sensory + moisture + activity +
-              mobility + nutrition + friction;`;
+const totalBradenScore = sensory + moisture + activity +
+                       mobility + nutrition + friction;`;
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(codeSnippet);
@@ -43,7 +43,7 @@ const total = sensory + moisture + activity +
             <Terminal className="w-4 h-4" />
             <span>braden-risk-engine.ts</span>
             <span className="ml-2 text-slate-600 text-xs hidden sm:inline-block">
-              — ความโปร่งใสของอัลกอริทึม
+              — Clinical Decision Logic Transparency
             </span>
           </div>
         </div>
@@ -62,12 +62,12 @@ const total = sensory + moisture + activity +
           <code className="text-slate-300">
             <span className="text-slate-500 italic">{"// นิยามเกณฑ์การตัดสินใจทางคลินิก (Clinical Decision Logic)"}</span>{"\n"}
             <span className="text-sky-400">const</span> <span className="text-emerald-400">getRiskLevel</span> = (<span className="text-orange-300">score</span>: <span className="text-yellow-400">number</span>) =&gt; {"{"}{"\n"}
-            {"  "}<span className="text-sky-400">if</span> (score &lt;= <span className="text-purple-400">9</span>)  <span className="text-sky-400">return</span> <span className="text-amber-300">"เสี่ยงสูงมาก"</span>;{"\n"}
-            {"  "}<span className="text-sky-400">if</span> (score &lt;= <span className="text-purple-400">12</span>) <span className="text-sky-400">return</span> <span className="text-amber-300">"เสี่ยงสูง"</span>;{"\n"}
-            {"  "}<span className="text-sky-400">if</span> (score &lt;= <span className="text-purple-400">14</span>) <span className="text-sky-400">return</span> <span className="text-amber-300">"เสี่ยงปานกลาง"</span>;{"\n"}
-            {"  "}<span className="text-sky-400">if</span> (score &lt;= <span className="text-purple-400">18</span>) <span className="text-sky-400">return</span> <span className="text-amber-300">"เสี่ยงต่ำ"</span>;{"\n"}
+            {"  "}<span className="text-sky-400">if</span> (score &lt;= <span className="text-purple-400">9</span>)  <span className="text-sky-400">return</span> <span className="text-amber-300">"เสี่ยงสูงมาก (Severe Risk)"</span>;{"\n"}
+            {"  "}<span className="text-sky-400">if</span> (score &lt;= <span className="text-purple-400">12</span>) <span className="text-sky-400">return</span> <span className="text-amber-300">"เสี่ยงสูง (High Risk)"</span>;{"\n"}
+            {"  "}<span className="text-sky-400">if</span> (score &lt;= <span className="text-purple-400">14</span>) <span className="text-sky-400">return</span> <span className="text-amber-300">"เสี่ยงปานกลาง (Moderate Risk)"</span>;{"\n"}
+            {"  "}<span className="text-sky-400">if</span> (score &lt;= <span className="text-purple-400">18</span>) <span className="text-sky-400">return</span> <span className="text-amber-300">"เสี่ยงเล็กน้อย (Mild Risk)"</span>;{"\n"}
             {"  "}{"\n"}
-            {"  "}<span className="text-sky-400">return</span> <span className="text-amber-300">"ไม่มีความเสี่ยง"</span>;{"\n"}
+            {"  "}<span className="text-sky-400">return</span> <span className="text-amber-300">"ไม่มีความเสี่ยง (No Risk)"</span>;{"\n"}
             {"}"};{"\n\n"}
             <span className="text-slate-500 italic">{"// ผลรวมคะแนนจากหมวดหมู่ทางคลินิกทั้ง 6 ด้าน"}</span>{"\n"}
             <span className="text-sky-400">const</span> <span className="text-emerald-400">totalBradenScore</span> = categories.<span className="text-emerald-400">reduce</span>((acc, val) =&gt; acc + val, <span className="text-purple-400">0</span>);
